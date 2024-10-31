@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -22,19 +23,29 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav class="navbar navbar-dark bg-dark w-100">
-                <a class="navbar-brand" href="#">MyDrone</a>
+            <div class="ml-auto d-flex align-items-center">
+                <form class="form-inline">
+                    <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
+                    <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
+                </form>
 
-                <!-- Ust Barda Sağ tarafa hizalanan alan -->
-                <div class="ml-auto d-flex align-items-center">
-                    <form class="form-inline">
-                        <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
-                        <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
-                    </form>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!-- Kullanıcı giriş yaptıysa profil fotoğrafı ve Çıkış Yap butonunu göster -->
+                    <a href="@Url.Action("Profile", "User")" class="nav-link">
+                        <img src="@Url.Action("GetUserProfileImage", "User", new { userId = User.FindFirstValue(ClaimTypes.NameIdentifier) })"
+                             class="rounded-circle" style="width: 40px; height: 40px;" alt="Profil Fotoğrafı">
+                    </a>
+                    <a href="@Url.Action("Logout", "User")" class="btn btn-outline-danger ml-2">Çıkış Yap</a>
+                }
+                else
+                {
+                    <!-- Kullanıcı giriş yapmamışsa Giriş Yap ve Hesap Aç butonlarını göster -->
                     <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
                     <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
-                </div>
-            </nav>
+                }
+            </div>
+
         </div>
         <div class="row">
             @if (ViewBag.HideLayoutSections == null || ViewBag.HideLayoutSections == false)

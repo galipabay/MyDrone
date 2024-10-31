@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using MyDrone.Kernel.Models;
 using MyDrone.Kernel.Services;
 using MyDrone.Types;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -31,6 +33,45 @@ namespace MyDrone.Web.App.Controllers
 
         }
 
+        #region Login
+
+        // GET: User/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            ViewBag.HideLayoutSections = true;
+            return View();
+        }
+
+        // POST: User/Login
+        [HttpPost]
+        public async Task<IActionResult> Login(string Identifier, string Password)
+        {
+            if (string.IsNullOrWhiteSpace(Identifier) || string.IsNullOrWhiteSpace(Password))
+            {
+                ModelState.AddModelError(string.Empty, "Kullanıcı adı ve şifre boş olamaz.");
+                return View();
+            }
+
+            var user = await _context.User.FirstOrDefaultAsync(u =>
+                (u.MailAddress == Identifier || u.TelNo == Identifier) && u.Password == Password);
+
+            if (user != null)
+            {
+                // Başarılı giriş için yönlendirme
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Geçersiz kullanıcı adı veya şifre.");
+                return View();
+            }
+        }
+
+        #endregion
+
+        #region Register
+
         // GET: UserDto/Register
         [HttpGet]
         public IActionResult Register()
@@ -39,50 +80,88 @@ namespace MyDrone.Web.App.Controllers
             return View();
         }
 
-        // POST: UserDto/Login
-        [HttpGet]
-        public async Task<IActionResult> Login(UserDto userDto)
+        // POST: UserDto/Register
+        [HttpPost]
+        public async Task<IActionResult> Register(UserDto userDto, string confirmPassword)
         {
+
+            // Eğer telefon numarası veya e-posta adresi boşsa hata döndür
+            if (string.IsNullOrWhiteSpace(userDto.TelNo) || string.IsNullOrWhiteSpace(userDto.MailAddress))
+            {
+                ModelState.AddModelError(string.Empty, "Telefon numarası ve e-posta adresi gereklidir.");
+                return View(userDto);
+            }
+
+            // Veritabanında aynı e-posta veya telefon numarası ile kayıtlı bir kullanıcı var mı kontrol et
+            var existingUser = await _context.User
+                .FirstOrDefaultAsync(u => u.MailAddress == userDto.MailAddress || u.TelNo == userDto.TelNo);
+
+            if (existingUser != null)
+            {
+                // Hata mesajı döndür ve aynı e-posta ya da telefon numarası olan kullanıcıya izin verme
+                if (existingUser.MailAddress == userDto.MailAddress)
+                {
+                    ModelState.AddModelError("MailAddress", "Bu e-posta adresiyle kayıtlı bir kullanıcı zaten var.");
+                }
+                if (existingUser.TelNo == userDto.TelNo)
+                {
+                    ModelState.AddModelError("TelNo", "Bu telefon numarasıyla kayıtlı bir kullanıcı zaten var.");
+                }
+                return View(userDto);
+            }
+
             if (ModelState.IsValid)
             {
-                
+                if (userDto.Password != confirmPassword)
+                {
+                    ModelState.AddModelError("ConfirmPassword", "Şifreler eşleşmiyor.");
+                    return View(userDto);
+                }
+
+                // Kullanıcıyı veritabanına ekleme
+                var newUser = _mapper.Map<User>(userDto); // UserDto'dan User'a haritalama
+                newUser.CreatedDate = DateTime.Now;
+                _context.User.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                // Başarılı kayıt sonrasında giriş ekranına yönlendirme yap
+                return RedirectToAction("Login");
             }
             // Model hatalıysa, aynı sayfayı yeniden göster
             return View(userDto);
         }
 
-        // POST: UserDto/Register
-        [HttpPost]
-        public async Task<IActionResult> Register(UserDto userDto)
+        #endregion
+
+        /// <summary>
+        /// Profil fotografini dbden ceken metot
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult GetUserProfileImage(int userId)
         {
-            if (ModelState.IsValid)
+            // Kullanıcıyı ID ile veritabanında bul
+            var user = _context.User.FirstOrDefault(u => u.Id == userId);
+
+            if (user != null && user.Image != null)
             {
-                // UserDto'dan User'a dönüştür
-                var user = _mapper.Map<User>(userDto);
-
-                // Kullanıcıyı veritabanına ekleme
-                _context.User.Add(user);
-                await _context.SaveChangesAsync();
-
-                // Başarılı bir kayıt sonrası başka bir sayfaya yönlendirme yapabilirsiniz.
-                return RedirectToAction("Index", "Home"); // Ana sayfaya yönlendirme örneği
+                // Eğer kullanıcıda bir profil fotoğrafı varsa onu döndür
+                return File(user.Image, "image/jpeg"); // "image/jpeg" dosya tipi olabilir, duruma göre değişebilir
             }
-            // Model hatalıysa, aynı sayfayı yeniden göster
-            return View(userDto);
+            else
+            {
+                // Varsayılan profil fotoğrafı döndür
+                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "default-profile.png");
+                var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
+                return File(defaultImage, "image/png");
+            }
         }
 
         // GET: UserDtoController
         public ActionResult Index()
         {
             return View();
-        }
-
-        public async Task<IActionResult> Save()
-        {
-            var users = await _service.GetAllAsync();
-            var usersDto = _mapper.Map<List<UserDto>>(users.ToList());
-            ViewBag.students = new SelectList(usersDto, "Id", "TcNo");
-            return View(usersDto);
         }
 
         // GET: UserDtoController/Details/5

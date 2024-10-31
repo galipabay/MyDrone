@@ -26,9 +26,9 @@ namespace MyDrone.Kernel.Models
 			set { surname = value; }
 		}
 
-		private int telNo;
+		private string telNo;
 
-		public int TelNo
+		public string TelNo
 		{
 			get { return telNo; }
 			set { telNo = value; }
@@ -106,9 +106,9 @@ namespace MyDrone.Kernel.Models
 			set { isSeller = value; }
 		}
 
-		private byte[] image;
+		private byte[]? image;
 
-		public byte[] Image
+		public byte[]? Image
 		{
 			get { return image; }
 			set { image = value; }
