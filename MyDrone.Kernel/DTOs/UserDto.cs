@@ -42,6 +42,14 @@ namespace MyDrone.Kernel.Models
 			set { mailAddress = value; }
 		}
 
+		private string password;
+
+		public string Password
+		{
+			get { return password; }
+			set { password = value; }
+		}
+
 		private string country;
 
 		public string Country

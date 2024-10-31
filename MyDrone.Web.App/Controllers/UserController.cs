@@ -8,7 +8,7 @@ using MyDrone.Types;
 
 namespace MyDrone.Web.App.Controllers
 {
-    public class UserDtoController : Controller
+    public class UserController : Controller
     {
 
         private readonly IService<UserDto> _service;
@@ -23,7 +23,7 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="mapper"></param>
         /// <param name="context"></param>
         /// 
-        public UserDtoController(IService<UserDto> service, IMapper mapper, AppDbContext context)
+        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context)
         {
             _service = service;
             _mapper = mapper;
@@ -35,23 +35,40 @@ namespace MyDrone.Web.App.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            ViewBag.HideLayoutSections = true;
             return View();
+        }
+
+        // POST: UserDto/Login
+        [HttpGet]
+        public async Task<IActionResult> Login(UserDto userDto)
+        {
+            if (ModelState.IsValid)
+            {
+                
+            }
+            // Model hatalıysa, aynı sayfayı yeniden göster
+            return View(userDto);
         }
 
         // POST: UserDto/Register
         [HttpPost]
-        public async Task<IActionResult> Register(UserDto user)
+        public async Task<IActionResult> Register(UserDto userDto)
         {
             if (ModelState.IsValid)
             {
+                // UserDto'dan User'a dönüştür
+                var user = _mapper.Map<User>(userDto);
+
                 // Kullanıcıyı veritabanına ekleme
-                _context.UserDtos.Add(user);
+                _context.User.Add(user);
                 await _context.SaveChangesAsync();
+
                 // Başarılı bir kayıt sonrası başka bir sayfaya yönlendirme yapabilirsiniz.
                 return RedirectToAction("Index", "Home"); // Ana sayfaya yönlendirme örneği
             }
             // Model hatalıysa, aynı sayfayı yeniden göster
-            return View(user);
+            return View(userDto);
         }
 
         // GET: UserDtoController

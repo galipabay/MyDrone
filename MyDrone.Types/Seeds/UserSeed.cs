@@ -12,22 +12,7 @@ namespace MyDrone.Types.Seed
     {
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<User> builder)
         {
-            builder.HasData(new User 
-            { 
-                Id = 1,
-                Name = "Galip",
-                Surname = "Abay",
-                TelNo = "sadasdasada",
-                MailAddress = "w31312",
-                Country = "1234567890",
-                City = "1234567890",
-                Province = "1234567890",
-                Apartment = "1234567890",
-                District = "1234567890",
-                Street = "1234567890",
-                IsSeller = true,
-                CreatedDate = DateTime.Now,
-            });
+           
         }
     }
 }

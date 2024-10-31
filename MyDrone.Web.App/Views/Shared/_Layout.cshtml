@@ -23,41 +23,45 @@
     <div class="container-fluid">
         <div class="row">
             <nav class="navbar navbar-dark bg-dark w-100">
-                <a class="navbar-brand" href="#">sahibinden.com</a>
+                <a class="navbar-brand" href="#">MyDrone</a>
 
-                <!-- Sağ tarafa hizalanan alan -->
+                <!-- Ust Barda Sağ tarafa hizalanan alan -->
                 <div class="ml-auto d-flex align-items-center">
                     <form class="form-inline">
                         <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
                         <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
                     </form>
-                    <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "UserDto")">Hesap Aç</a>
-                    <button class="btn btn-primary">Giriş Yap</button>
+                    <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
+                    <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
                 </div>
             </nav>
         </div>
         <div class="row">
-            <div class="col-2 sidebar bg-light">
-                <ul class="nav flex-column mt-3">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Acil Acil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Son 48 Saat / 1 Hafta / 1 Ay</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Oto360</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Emlak360</a>
-                    </li>
-                    <!-- Diğer menü elemanları burada yer alacak -->
-                </ul>
-            </div>
+            @if (ViewBag.HideLayoutSections == null || ViewBag.HideLayoutSections == false)
+            {
+                <div class="col-2 sidebar bg-light">
+                    <ul class="nav flex-column mt-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Acil Acil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Son 48 Saat / 1 Hafta / 1 Ay</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Oto360</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Emlak360</a>
+                        </li>
+                        <!-- Diğer menü elemanları burada yer alacak -->
+                    </ul>
+                </div>
+            }
             <div class="col-10 main-content">
                 @RenderBody()
             </div>
         </div>
+
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>

@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+            .form-container:hover {
+                transform: scale(1.02);
+            }
+
+        .form-group label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: #ffffff;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-custom:hover {
+                background-color: #0056b3;
+            }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container form-container">
+        <h3 class="text-center mb-4">Kayıt Ol</h3>
+        <form id="registerForm" action="/UserDto/Register" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="name">Ad</label>
+                <input type="text" class="form-control" id="name" name="Name" required>
+            </div>
+            <div class="form-group">
+                <label for="surname">Soyad</label>
+                <input type="text" class="form-control" id="surname" name="Surname" required>
+            </div>
+            <div class="form-group">
+                <label for="telno">Telefon Numarası</label>
+                <input type="tel" class="form-control" id="telno" name="TelNo" required>
+            </div>
+            <div class="form-group">
+                <label for="mail">E-posta</label>
+                <input type="email" class="form-control" id="mail" name="MailAddress" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="country">Ülke</label>
+                    <input type="text" class="form-control" id="country" name="Country" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="city">Şehir</label>
+                    <input type="text" class="form-control" id="city" name="City" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="province">İlçe</label>
+                    <input type="text" class="form-control" id="province" name="Province" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="district">Mahalle</label>
+                    <input type="text" class="form-control" id="district" name="District" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="street">Cadde/Sokak</label>
+                <input type="text" class="form-control" id="street" name="Street" required>
+            </div>
+            <div class="form-group">
+                <label for="apartment">Apartman/Daire</label>
+                <input type="text" class="form-control" id="apartment" name="Apartment" required>
+            </div>
+            <div class="form-group">
+                <label for="isSeller">Satıcı mısınız?</label>
+                <select class="form-control" id="isSeller" name="IsSeller">
+                    <option value="false">Hayır</option>
+                    <option value="true">Evet</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" class="form-control" id="password" name="Password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Şifreyi Onayla</label>
+                <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword" required>
+                <div id="passwordError" class="error-message" style="display: none;">Şifreler eşleşmiyor!</div>
+            </div>
+            <div class="form-group">
+                <label for="image">Profil Fotoğrafı</label>
+                <input type="file" class="form-control-file" id="image" name="Image" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-custom btn-block">Kayıt Ol</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        function validateForm() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const passwordError = document.getElementById('passwordError');
+
+            if (password !== confirmPassword) {
+                passwordError.style.display = 'block';
+                return false; // Form gönderimini engelle
+            } else {
+                passwordError.style.display = 'none';
+                return true; // Formu gönder
+            }
+        }
+    </script>
+</body>
+</html>
