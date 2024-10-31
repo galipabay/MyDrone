@@ -98,14 +98,14 @@ namespace MyDrone.Kernel.Models
 			set { isSeller = value; }
 		}
 
-		private byte[] image;
+		private byte[]? image;
 
-		public byte[] Image
+		public byte[]? Image
 		{
 			get { return image; }
 			set { image = value; }
 		}
-
+		
 		#endregion
 	}
 }

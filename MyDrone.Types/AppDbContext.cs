@@ -21,12 +21,17 @@ namespace MyDrone.Types
 		}
 
 		public DbSet<User> User { get; set; }
+
+		public DbSet<UserDto> UserDtos { get; set; }
 		public DbSet<Device> Device { get; set; }
 
-		string connectionString = "Data Source=GALIPABAY;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+        public DbSet<DeviceDto> DeviceDtos { get; set; }
+
+        //string connectionString = "Data Source=GALIPABAY;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+        string connectionString = "Data Source=DESKTOP-Q0BKLV1;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseSqlServer(connectionString, builder =>
 			{

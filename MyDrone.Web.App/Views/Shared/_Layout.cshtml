@@ -6,9 +6,17 @@
     <title>@ViewBag.Title - MyDrone</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <style>
-        body { font-family: Arial, sans-serif; }
-        .sidebar { width: 250px; }
-        .main-content { margin-left: 260px; }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            width: 250px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+        }
     </style>
 </head>
 <body>
@@ -16,12 +24,16 @@
         <div class="row">
             <nav class="navbar navbar-dark bg-dark w-100">
                 <a class="navbar-brand" href="#">sahibinden.com</a>
-                <form class="form-inline my-2 my-lg-0">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Detaylı Arama</button>
-                </form>
-                <button class="btn btn-primary ml-2">Giriş Yap</button>
-                <button class="btn btn-secondary ml-2">Hesap Aç</button>
+
+                <!-- Sağ tarafa hizalanan alan -->
+                <div class="ml-auto d-flex align-items-center">
+                    <form class="form-inline">
+                        <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
+                        <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
+                    </form>
+                    <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "UserDto")">Hesap Aç</a>
+                    <button class="btn btn-primary">Giriş Yap</button>
+                </div>
             </nav>
         </div>
         <div class="row">
