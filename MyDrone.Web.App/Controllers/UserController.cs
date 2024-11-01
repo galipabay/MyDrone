@@ -7,6 +7,9 @@ using MyDrone.Kernel.Services;
 using MyDrone.Types;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -47,17 +50,36 @@ namespace MyDrone.Web.App.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string Identifier, string Password)
         {
+            // Eğer kullanıcı adı veya şifre boşsa hata döndür
             if (string.IsNullOrWhiteSpace(Identifier) || string.IsNullOrWhiteSpace(Password))
             {
                 ModelState.AddModelError(string.Empty, "Kullanıcı adı ve şifre boş olamaz.");
                 return View();
             }
 
+            // Kullanıcıyı veritabanından kontrol et
             var user = await _context.User.FirstOrDefaultAsync(u =>
                 (u.MailAddress == Identifier || u.TelNo == Identifier) && u.Password == Password);
 
+
             if (user != null)
             {
+                // Kullanıcı bulundu, claim'leri oluştur
+                var claims = new List<Claim>
+                {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
+                new Claim(ClaimTypes.Email, user.MailAddress), // E-posta adresi
+                new Claim(ClaimTypes.Name, user.Name), // Kullanıcı adı (varsa)
+                new Claim(ClaimTypes.Surname, user.Surname),// Kullanıcı soyadı (varsa)
+                // Diğer claim'leri buraya ekleyebilirsiniz
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                // Kullanıcıyı oturum açtır
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
                 // Başarılı giriş için yönlendirme
                 return RedirectToAction("Index", "Home");
             }
@@ -82,7 +104,7 @@ namespace MyDrone.Web.App.Controllers
 
         // POST: UserDto/Register
         [HttpPost]
-        public async Task<IActionResult> Register(UserDto userDto, string confirmPassword)
+        public async Task<IActionResult> Register(UserDto userDto, string confirmPassword, IFormFile? image)
         {
 
             // Eğer telefon numarası veya e-posta adresi boşsa hata döndür
@@ -121,6 +143,17 @@ namespace MyDrone.Web.App.Controllers
                 // Kullanıcıyı veritabanına ekleme
                 var newUser = _mapper.Map<User>(userDto); // UserDto'dan User'a haritalama
                 newUser.CreatedDate = DateTime.Now;
+
+                // Fotoğraf verisini al ve byte dizisine dönüştür
+                if (image != null && image.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await image.CopyToAsync(memoryStream);
+                        newUser.Image = memoryStream.ToArray(); // Fotoğrafı byte dizisine ata
+                    }
+                }
+
                 _context.User.Add(newUser);
                 await _context.SaveChangesAsync();
 
@@ -156,6 +189,17 @@ namespace MyDrone.Web.App.Controllers
                 var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
                 return File(defaultImage, "image/png");
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            // Kullanıcıyı oturumdan çıkar
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Ana sayfaya veya giriş sayfasına yönlendir
+            return RedirectToAction("Login", "User");
         }
 
         // GET: UserDtoController

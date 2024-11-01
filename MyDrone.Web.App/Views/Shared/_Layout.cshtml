@@ -22,7 +22,8 @@
 </head>
 <body>
     <div class="container-fluid">
-        <div class="row">
+        <nav class="navbar navbar-dark bg-dark w-100">
+            <a class="navbar-brand" href="#">MyDrone</a>
             <div class="ml-auto d-flex align-items-center">
                 <form class="form-inline">
                     <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
@@ -31,22 +32,24 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <!-- Kullanıcı giriş yaptıysa profil fotoğrafı ve Çıkış Yap butonunu göster -->
                     <a href="@Url.Action("Profile", "User")" class="nav-link">
                         <img src="@Url.Action("GetUserProfileImage", "User", new { userId = User.FindFirstValue(ClaimTypes.NameIdentifier) })"
                              class="rounded-circle" style="width: 40px; height: 40px;" alt="Profil Fotoğrafı">
                     </a>
-                    <a href="@Url.Action("Logout", "User")" class="btn btn-outline-danger ml-2">Çıkış Yap</a>
+
+                    <form asp-controller="User" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-outline-danger ml-2">Çıkış Yap</button>
+                    </form>
+
                 }
                 else
                 {
-                    <!-- Kullanıcı giriş yapmamışsa Giriş Yap ve Hesap Aç butonlarını göster -->
                     <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
                     <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
                 }
             </div>
+        </nav>
 
-        </div>
         <div class="row">
             @if (ViewBag.HideLayoutSections == null || ViewBag.HideLayoutSections == false)
             {
@@ -64,7 +67,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#">Emlak360</a>
                         </li>
-                        <!-- Diğer menü elemanları burada yer alacak -->
                     </ul>
                 </div>
             }
@@ -72,7 +74,6 @@
                 @RenderBody()
             </div>
         </div>
-
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>

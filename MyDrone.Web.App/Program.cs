@@ -11,6 +11,8 @@ using MyDrone.Types.Repositories;
 using MyDrone.Types.UnitOfWork;
 using System.Reflection;
 using MyDrone.Web.App.Modules;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,16 @@ builder.Services.AddSession(options =>
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new RepoServiceModule()));
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+	.AddCookie(options =>
+	{
+		options.LoginPath = "/User/Login"; // Giriþ yolu
+		options.LogoutPath = "/User/Logout"; // Çýkýþ yolu
+		options.AccessDeniedPath = "/User/AccessDenied"; // Eriþim engelli yolu
+	});
+
+builder.Services.AddControllersWithViews();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.'
@@ -58,13 +70,15 @@ if (!app.Environment.IsDevelopment())
 	app.UseHsts();
 }
 
+// Middleware'leri ayarlama
+app.UseAuthentication(); // Kimlik doðrulama middleware'ini ekle
+app.UseAuthorization();  // Yetkilendirme middleware'ini ekle
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
-
-app.UseAuthorization();
 
 app.MapControllerRoute(
 	name: "default",
