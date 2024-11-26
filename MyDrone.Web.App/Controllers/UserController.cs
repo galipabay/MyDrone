@@ -20,7 +20,6 @@ namespace MyDrone.Web.App.Controllers
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
 
-
         /// <summary>
         /// Dependency Injection yapiyoruz.
         /// </summary>
@@ -64,7 +63,7 @@ namespace MyDrone.Web.App.Controllers
 
             if (user != null)
             {
-                // Kullanıcı bulundu, claim'leri oluştur
+                // Kullanıcı bulundu, claim'leri oluştur (galip)
                 var claims = new List<Claim>
                 {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
