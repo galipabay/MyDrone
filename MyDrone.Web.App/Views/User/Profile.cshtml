@@ -1,0 +1,140 @@
+﻿@model MyDrone.Kernel.Models.UserDto
+
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: auto;
+            padding-left: 0px;
+            padding-right: 0px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+            .profile-header img {
+                border-radius: 50%;
+                width: 100px;
+                height: 100px;
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+
+            .profile-header h2 {
+                margin: 0;
+
+            }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .btn-update {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="@Url.Action("GetUserProfileImage", "User", new { userId = Model.Id })" alt="Profil Fotoğrafı">
+            <h2>@Model.Name @Model.Surname</h2>
+        </div>
+
+        <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label for="Name">Ad</label>
+                <input type="text" class="form-control" asp-for="Name" required />
+            </div>
+
+            <div class="form-group">
+                <label for="Surname">Soyad</label>
+                <input type="text" class="form-control" asp-for="Surname" required />
+            </div>
+
+            <div class="form-group">
+                <label for="MailAddress">E-posta</label>
+                <input type="email" class="form-control" asp-for="MailAddress" required />
+            </div>
+
+            <div class="form-group">
+                <label for="TelNo">Telefon Numarası</label>
+                <input type="text" class="form-control" asp-for="TelNo" required />
+            </div>
+
+            <div class="form-group">
+                <label for="Apartment">Daire</label>
+                <input type="text" class="form-control" asp-for="Apartment" />
+            </div>
+
+            <div class="form-group">
+                <label for="City">Şehir</label>
+                <input type="text" class="form-control" asp-for="City" />
+            </div>
+
+            <div class="form-group">
+                <label for="Country">Ülke</label>
+                <input type="text" class="form-control" asp-for="Country" />
+            </div>
+
+            <div class="form-group">
+                <label for="District">Semt</label>
+                <input type="text" class="form-control" asp-for="District" />
+            </div>
+
+            <div class="form-group">
+                <label for="Province">İl</label>
+                <input type="text" class="form-control" asp-for="Province" />
+            </div>
+
+            <div class="form-group">
+                <label for="Street">Sokak</label>
+                <input type="text" class="form-control" asp-for="Street" />
+            </div>
+
+            <div class="form-group">
+                <label for="Image">Profil Fotoğrafı</label>
+                <input type="file" class="form-control" name="Image" accept="image/*" />
+            </div>
+
+            <button type="submit" class="btn btn-update">Güncelle</button>
+        </form>
+    </div>
+    <script>
+        function toggleMenu() {
+            $('.sidebar').toggle();
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

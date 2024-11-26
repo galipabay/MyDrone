@@ -106,7 +106,7 @@ namespace MyDrone.Web.App.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(UserDto userDto, string confirmPassword, IFormFile? image)
         {
-
+            ViewBag.HideLayoutSections = true;
             // Eğer telefon numarası veya e-posta adresi boşsa hata döndür
             if (string.IsNullOrWhiteSpace(userDto.TelNo) || string.IsNullOrWhiteSpace(userDto.MailAddress))
             {
@@ -166,6 +166,7 @@ namespace MyDrone.Web.App.Controllers
 
         #endregion
 
+        #region GetUserProfileImage
         /// <summary>
         /// Profil fotografini dbden ceken metot
         /// </summary>
@@ -189,8 +190,10 @@ namespace MyDrone.Web.App.Controllers
                 var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
                 return File(defaultImage, "image/png");
             }
-        }
+        } 
+        #endregion
 
+        #region Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -200,7 +203,86 @@ namespace MyDrone.Web.App.Controllers
 
             // Ana sayfaya veya giriş sayfasına yönlendir
             return RedirectToAction("Login", "User");
-        }
+        } 
+        #endregion
+
+        #region Profile
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Kullanıcı bilgilerini veritabanından çekiyoruz.
+            var user = await _context.User
+                .Where(u => u.Id == int.Parse(userId))
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    MailAddress = u.MailAddress,
+                    TelNo = u.TelNo,
+                    Image = u.Image,
+                    Apartment = u.Apartment,
+                    City = u.City,
+                    Country = u.Country,
+                    District = u.District,
+                    Province = u.Province,
+                    Street = u.Street
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        } 
+        #endregion
+
+        #region UpdateProfile
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(UserDto model, IFormFile Image)
+        {
+            ViewBag.HideLayoutSections = true;
+            var user = await _context.User.FindAsync(model.Id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Name = model.Name;
+            user.Surname = model.Surname;
+            user.MailAddress = model.MailAddress;
+            user.TelNo = model.TelNo;
+            user.Country = model.Country;
+            user.City = model.City;
+            user.District = model.District;
+            user.Street = model.Street;
+            user.Apartment = model.Apartment;
+            user.Province = model.Province;
+
+            if (Image != null && Image.Length > 0)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    await Image.CopyToAsync(ms);
+                    user.Image = ms.ToArray();
+                }
+            }
+
+            _context.User.Update(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Profile");
+        } 
+        #endregion
 
         // GET: UserDtoController
         public ActionResult Index()

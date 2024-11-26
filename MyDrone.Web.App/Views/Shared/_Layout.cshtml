@@ -9,74 +9,166 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Yatay kaydırmayı önler */
         }
 
+        /* Navbar stilleri */
+        .navbar {
+            background-color: #213952;
+            z-index: 1000;
+            position: sticky;
+            width: 100%;
+            top: 0;
+            padding: 10px 20px;
+        }
+
+            .navbar .nav-link {
+                color: white;
+            }
+
+                .navbar .nav-link:hover {
+                    color: #ffcc00;
+                }
+
+        /* Sidebar stilleri */
         .sidebar {
-            width: 250px;
+            width: 60px;
+            height: 100%;
+            background-color: #213952;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: width 0.3s, left 0.3s;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            color: white;
+            padding-top: 20px;
+            z-index: 999; /* Navbarın altında kalması için ayarlıyoruz */
         }
 
+            .sidebar.open {
+                width: 250px;
+                left: 0;
+            }
+
+            .sidebar .toggle-button {
+                position: absolute;
+                top: 20px;
+                right: -30px;
+                background-color: #213952;
+                border: none;
+                color: white;
+                cursor: pointer;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 0 5px 5px 0;
+                z-index: 1100; /* Ok simgesi navbarın üstünde görünecek şekilde ayarlandı */
+            }
+
+            .sidebar .list-group-item {
+                background-color: transparent;
+                border: none;
+                color: white;
+            }
+
+                .sidebar .list-group-item:hover {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+
+        /* Main content alanı */
         .main-content {
-            margin-left: 260px;
+            margin-left: 60px;
+            padding-top: 70px; /* Navbar yüksekliği kadar boşluk */
+            transition: margin-left 0.3s;
+        }
+
+            .main-content.shift {
+                margin-left: 250px;
+            }
+
+        /* Menü butonunu üst barın hemen altına yerleştirme */
+        .menu-toggle-container {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            z-index: 1100; /* Menü butonu navbarın üstünde */
+        }
+
+        /* Ok simgeleri */
+        .toggle-icon {
+            font-size: 24px;
+            color: white;
+            transition: transform 0.3s;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <nav class="navbar navbar-dark bg-dark w-100">
-            <a class="navbar-brand" href="#">MyDrone</a>
-            <div class="ml-auto d-flex align-items-center">
-                <form class="form-inline">
-                    <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
-                    <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
-                </form>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark w-100">
+        <a class="navbar-brand" href="#">MyDrone</a>
+        <div class="d-flex align-items-center">
+            <form class="form-inline">
+                <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
+                <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
+            </form>
 
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a href="@Url.Action("Profile", "User")" class="nav-link">
-                        <img src="@Url.Action("GetUserProfileImage", "User", new { userId = User.FindFirstValue(ClaimTypes.NameIdentifier) })"
-                             class="rounded-circle" style="width: 40px; height: 40px;" alt="Profil Fotoğrafı">
-                    </a>
-
-                    <form asp-controller="User" asp-action="Logout" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-outline-danger ml-2">Çıkış Yap</button>
-                    </form>
-
-                }
-                else
-                {
-                    <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
-                    <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
-                }
-            </div>
-        </nav>
-
-        <div class="row">
-            @if (ViewBag.HideLayoutSections == null || ViewBag.HideLayoutSections == false)
+            @if (User.Identity.IsAuthenticated)
             {
-                <div class="col-2 sidebar bg-light">
-                    <ul class="nav flex-column mt-3">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Acil Acil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Son 48 Saat / 1 Hafta / 1 Ay</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Oto360</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Emlak360</a>
-                        </li>
-                    </ul>
-                </div>
+                <a href="@Url.Action("Profile", "User")" class="nav-link">
+                    <img src="@Url.Action("GetUserProfileImage", "User", new { userId = User.FindFirstValue(ClaimTypes.NameIdentifier) })"
+                         class="rounded-circle" style="width: 40px; height: 40px;" alt="Profil Fotoğrafı">
+                </a>
+
+                <form asp-controller="User" asp-action="Logout" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline-danger ml-2">Çıkış Yap</button>
+                </form>
             }
-            <div class="col-10 main-content">
-                @RenderBody()
-            </div>
+            else
+            {
+                <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
+                <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
+            }
+        </div>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <h4>Menü</h4>
+        <ul class="list-group">
+            <li class="list-group-item"><a href="#" class="text-white">Ürünlerim</a></li>
+            <li class="list-group-item"><a href="#" class="text-white">Bildirimler</a></li>
+            <li class="list-group-item"><a href="#" class="text-white">Favoriler</a></li>
+        </ul>
+        <button class="toggle-button" onclick="toggleMenu()">
+            <span class="toggle-icon" id="toggle-icon">&#9654;</span>
+        </button>
+    </div>
+
+    <div class="content main-content" id="main-content">
+        <div class="menu-toggle-container">
         </div>
     </div>
+
+    @RenderBody()
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        function toggleMenu() {
+            $('#sidebar').toggleClass('open'); // Sidebar'ı aç/kapa
+            $('#main-content').toggleClass('shift'); // İçerik alanını kaydır
+
+            // Ok simgesini döndür
+            const icon = $('#toggle-icon');
+            if ($('#sidebar').hasClass('open')) {
+                icon.html('&#9664;'); // Sol ok
+            } else {
+                icon.html('&#9654;'); // Sağ ok
+            }
+        }
+    </script>
 </body>
 </html>
