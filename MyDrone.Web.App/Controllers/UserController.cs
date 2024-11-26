@@ -63,7 +63,7 @@ namespace MyDrone.Web.App.Controllers
 
             if (user != null)
             {
-                // Kullanıcı bulundu, claim'leri oluştur (galip)
+                // Kullanıcı bulundu, claim'leri oluştur (galip<3 Emir asd)
                 var claims = new List<Claim>
                 {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
