@@ -22,6 +22,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
+builder.Services.AddScoped<EmailService>();  // EmailService'i ekliyoruz
 
 builder.Services.AddAutoMapper(typeof(MapProfile));
 
@@ -59,6 +60,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 	});
 
 builder.Services.AddControllersWithViews();
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+{
+    containerBuilder.RegisterModule(new RepoServiceModule()); // RepoServiceModule'u burada kaydediyoruz
+});
+
+
+
 
 var app = builder.Build();
 

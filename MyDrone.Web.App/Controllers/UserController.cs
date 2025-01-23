@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using MyDrone.Business.Services;
+using MyDrone.Web.App.Models;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -19,6 +21,8 @@ namespace MyDrone.Web.App.Controllers
         private readonly IService<UserDto> _service;
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
+        private readonly EmailService _emailService;
+
 
         /// <summary>
         /// Dependency Injection yapiyoruz.
@@ -27,11 +31,12 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="mapper"></param>
         /// <param name="context"></param>
         /// 
-        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context)
+        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context, EmailService emailService)
         {
             _service = service;
             _mapper = mapper;
             _context = context;
+            _emailService = emailService;
 
         }
 
@@ -63,7 +68,7 @@ namespace MyDrone.Web.App.Controllers
 
             if (user != null)
             {
-                // Kullanıcı bulundu, claim'leri oluştur
+                // Kullanıcı bulundu, claim'leri oluştur 
                 var claims = new List<Claim>
                 {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
@@ -189,7 +194,7 @@ namespace MyDrone.Web.App.Controllers
                 var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
                 return File(defaultImage, "image/png");
             }
-        } 
+        }
         #endregion
 
         #region Logout
@@ -202,7 +207,7 @@ namespace MyDrone.Web.App.Controllers
 
             // Ana sayfaya veya giriş sayfasına yönlendir
             return RedirectToAction("Login", "User");
-        } 
+        }
         #endregion
 
         #region Profile
@@ -241,7 +246,7 @@ namespace MyDrone.Web.App.Controllers
             }
 
             return View(user);
-        } 
+        }
         #endregion
 
         #region UpdateProfile
@@ -249,12 +254,14 @@ namespace MyDrone.Web.App.Controllers
         public async Task<IActionResult> UpdateProfile(UserDto model, IFormFile Image)
         {
             ViewBag.HideLayoutSections = true;
+
             var user = await _context.User.FindAsync(model.Id);
 
             if (user == null)
             {
                 return NotFound();
             }
+
 
             user.Name = model.Name;
             user.Surname = model.Surname;
@@ -280,7 +287,90 @@ namespace MyDrone.Web.App.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Profile");
-        } 
+        }
+        #endregion
+
+        #region ForgotPassword
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();  // ForgotPassword.cshtml sayfasına yönlendirir
+        }
+
+        [HttpPost]
+        public IActionResult ForgotPassword(string email)
+        {
+            var user = _context.User.FirstOrDefault(u => u.MailAddress == email);
+
+            if (user != null)
+            {
+                // Token oluşturuluyor
+                var token = Guid.NewGuid().ToString();
+                user.ResetPasswordToken = token;  // Token'ı veritabanında saklıyoruz
+                _context.User.Update(user);
+                _context.SaveChanges();
+
+                // Şifre sıfırlama bağlantısı oluşturuluyor
+                var resetPasswordUrl = Url.Action("ResetPassword", "User", new { token = token }, protocol: Request.Scheme);
+
+                // Şifre sıfırlama e-postası gönderiliyor
+                var subject = "Şifre Sıfırlama Bağlantısı";
+                var body = $"Şifrenizi sıfırlamak için aşağıdaki bağlantıyı tıklayın: <a href='{resetPasswordUrl}'>Şifre Sıfırlama</a>";
+                _emailService.SendEmail(email, subject, body);
+
+                TempData["Message"] = "E-posta adresinize bir şifre sıfırlama bağlantısı gönderildi.";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "E-posta adresi ile kayıtlı bir kullanıcı bulunamadı.");
+            }
+
+            return RedirectToAction("Login");
+        }
+
+        #endregion
+
+        #region ResetPassword
+        [HttpGet]
+        public IActionResult ResetPassword(string token)
+        {
+            // Token doğrulama işlemi yapılmalı
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");  // Geçerli token yoksa giriş sayfasına yönlendir
+            }
+
+            // Token'ı modelin içine aktarıyoruz
+            return View(new ResetPasswordViewModel { Token = token });
+        }
+
+        [HttpPost]
+        public IActionResult ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Token doğrulama ve şifre sıfırlama işlemi yapılmalı
+                // Burada token'ı doğrulamalısın ve şifreyi güncellemelisin.
+                // Token geçerli ise, şifreyi veritabanında güncelleyebilirsin.
+
+                var user = _context.User.FirstOrDefault(u => u.ResetPasswordToken == model.Token); // Token'ı veritabanında kontrol et
+                if (user != null)
+                {
+                    // Şifreyi güncelle
+                    user.Password = model.Password;  // Şifreyi güncelliyoruz
+                    _context.User.Update(user);
+                    _context.SaveChanges();
+
+                    TempData["Message"] = "Şifreniz başarıyla değiştirildi!";
+                    return RedirectToAction("Login");
+                }
+
+                ModelState.AddModelError(string.Empty, "Geçersiz token.");
+            }
+
+            return View(model);
+        }
+
         #endregion
 
         // GET: UserDtoController

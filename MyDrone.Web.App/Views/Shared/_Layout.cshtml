@@ -1,4 +1,6 @@
-﻿@using System.Security.Claims
+﻿<!-- Head kısmında Font Awesome ekleme -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+@using System.Security.Claims
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -15,8 +17,8 @@
         /* Navbar stilleri */
         .navbar {
             background-color: #213952;
-            z-index: 1000;
-            position: sticky;
+            z-index: 1050; /* Sidebar'dan daha yüksek olmalı */
+            position: fixed; /* Üstte sabitlenir */
             width: 100%;
             top: 0;
             padding: 10px 20px;
@@ -36,18 +38,22 @@
             height: 100%;
             background-color: #213952;
             position: fixed;
-            top: 0;
+            top: 60px; /* Navbar'ın altında başlasın */
             left: 0;
             transition: width 0.3s, left 0.3s;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
             color: white;
+            z-index: 1040; /* Navbar'ın altında */
             padding-top: 20px;
-            z-index: 999; /* Navbarın altında kalması için ayarlıyoruz */
         }
 
             .sidebar.open {
                 width: 250px;
                 left: 0;
+            }
+
+            .sidebar:hover {
+                width: 250px;
             }
 
             .sidebar .toggle-button {
@@ -71,22 +77,37 @@
                 background-color: transparent;
                 border: none;
                 color: white;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap; /* Metni taşırmaz */
+                display: flex;
+                align-items: center;
             }
 
-                .sidebar .list-group-item:hover {
-                    background-color: rgba(255, 255, 255, 0.2);
-                }
+            .sidebar:hover .list-group-item {
+                overflow: visible;
+                white-space: normal;
+            }
 
-        /* Main content alanı */
+        .menu-text {
+            display: none;
+        }
+
+        .sidebar:hover .menu-text {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        /* Ana içerik alanı */
         .main-content {
             margin-left: 60px;
             padding-top: 70px; /* Navbar yüksekliği kadar boşluk */
-            transition: margin-left 0.3s;
+            transition: margin-left 0.3s ease-in-out;
         }
 
-            .main-content.shift {
-                margin-left: 250px;
-            }
+        .sidebar:hover ~ .main-content {
+            margin-left: 250px;
+        }
 
         /* Menü butonunu üst barın hemen altına yerleştirme */
         .menu-toggle-container {
@@ -133,17 +154,68 @@
         </div>
     </nav>
 
-    <div class="sidebar" id="sidebar">
-        <h4>Menü</h4>
-        <ul class="list-group">
-            <li class="list-group-item"><a href="#" class="text-white">Ürünlerim</a></li>
-            <li class="list-group-item"><a href="#" class="text-white">Bildirimler</a></li>
-            <li class="list-group-item"><a href="#" class="text-white">Favoriler</a></li>
-        </ul>
-        <button class="toggle-button" onclick="toggleMenu()">
-            <span class="toggle-icon" id="toggle-icon">&#9654;</span>
-        </button>
-    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="sidebar" id="sidebar">
+            <ul class="list-group">
+                <li class="list-group-item d-flex align-items-center">
+                    <i class="fas fa-box-open mr-2"></i>
+                    <span class="menu-text">Ürünlerim</span>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <i class="fas fa-bell mr-2"></i>
+                    <span class="menu-text">Bildirimler</span>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <i class="fas fa-heart mr-2"></i>
+                    <span class="menu-text">Favoriler</span>
+                </li>
+            </ul>
+        </div>
+    }
+
+    <style>
+
+        .sidebar .list-group-item {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Metni taşırmaz */
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .menu-text {
+            display: none;
+            white-space: nowrap;
+        }
+
+        .sidebar.open .list-group-item {
+            overflow: visible;
+            white-space: normal;
+        }
+
+        .sidebar.open .menu-text {
+            display: inline-block;
+            margin-left: 10px;
+        }
+    </style>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.getElementById('toggle-icon');
+
+            sidebar.classList.toggle('open');
+
+            if (sidebar.classList.contains('open')) {
+                icon.innerHTML = '&#9664;'; // Sol ok
+            } else {
+                icon.innerHTML = '&#9654;'; // Sağ ok
+            }
+        }
+    </script>
 
     <div class="content main-content" id="main-content">
         <div class="menu-toggle-container">
@@ -156,19 +228,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
+
+
     <script>
         function toggleMenu() {
-            $('#sidebar').toggleClass('open'); // Sidebar'ı aç/kapa
-            $('#main-content').toggleClass('shift'); // İçerik alanını kaydır
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const icon = document.getElementById('toggle-icon');
 
-            // Ok simgesini döndür
-            const icon = $('#toggle-icon');
-            if ($('#sidebar').hasClass('open')) {
-                icon.html('&#9664;'); // Sol ok
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('shift');
+
+            if (sidebar.classList.contains('open')) {
+                icon.innerHTML = '&#9664;'; // Sol ok
             } else {
-                icon.html('&#9654;'); // Sağ ok
+                icon.innerHTML = '&#9654;'; // Sağ ok
             }
         }
+
+
     </script>
 </body>
 </html>

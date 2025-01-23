@@ -113,7 +113,9 @@ namespace MyDrone.Kernel.Models
 			get { return image; }
 			set { image = value; }
 		}
-		
-		#endregion
-	}
+
+        public string ResetPasswordToken { get; set; }
+
+        #endregion
+    }
 }
