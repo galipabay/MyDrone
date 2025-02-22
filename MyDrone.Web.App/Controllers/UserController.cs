@@ -21,7 +21,7 @@ namespace MyDrone.Web.App.Controllers
         private readonly IService<UserDto> _service;
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
 
         /// <summary>
@@ -30,8 +30,8 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="service"></param>
         /// <param name="mapper"></param>
         /// <param name="context"></param>
-        /// 
-        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context, EmailService emailService)
+        /// <param name="emailService"></param>
+        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context, IEmailService emailService)
         {
             _service = service;
             _mapper = mapper;
@@ -298,9 +298,9 @@ namespace MyDrone.Web.App.Controllers
         }
 
         [HttpPost]
-        public IActionResult ForgotPassword(string email)
+        public IActionResult ForgotPassword(string Identifier)
         {
-            var user = _context.User.FirstOrDefault(u => u.MailAddress == email);
+            var user = _context.User.FirstOrDefault(u => u.MailAddress == Identifier);
 
             if (user != null)
             {
@@ -316,7 +316,7 @@ namespace MyDrone.Web.App.Controllers
                 // Şifre sıfırlama e-postası gönderiliyor
                 var subject = "Şifre Sıfırlama Bağlantısı";
                 var body = $"Şifrenizi sıfırlamak için aşağıdaki bağlantıyı tıklayın: <a href='{resetPasswordUrl}'>Şifre Sıfırlama</a>";
-                _emailService.SendEmail(email, subject, body);
+                _emailService.SendEmail(Identifier, subject, body);
 
                 TempData["Message"] = "E-posta adresinize bir şifre sıfırlama bağlantısı gönderildi.";
             }
@@ -372,6 +372,14 @@ namespace MyDrone.Web.App.Controllers
         }
 
         #endregion
+
+
+
+        public IActionResult SendEmail()
+        {
+            _emailService.SendEmail("example@example.com", "Test Subject", "Test Body");
+            return View();
+        }
 
         // GET: UserDtoController
         public ActionResult Index()

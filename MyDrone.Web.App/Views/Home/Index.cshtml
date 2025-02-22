@@ -2,7 +2,143 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyDrone - Ana Sayfa</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .carousel-item img {
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .section-title {
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .infinite-scroll {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            transition: transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Son Görüntülenen İlanlar -->
+        <h2 class="section-title">Son Görüntülenen İlanlar</h2>
+        <div id="recentlyViewedCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="İlan 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="İlan 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="İlan 3">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#recentlyViewedCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Önceki</span>
+            </a>
+            <a class="carousel-control-next" href="#recentlyViewedCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Sonraki</span>
+            </a>
+        </div>
+
+        <!-- Haftanın Popüler İlanları -->
+        <h2 class="section-title">Haftanın Popüler İlanları</h2>
+        <div id="popularCarousel" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="Popüler 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="Popüler 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://via.placeholder.com/800x250" class="d-block w-100" alt="Popüler 3">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#popularCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Önceki</span>
+            </a>
+            <a class="carousel-control-next" href="#popularCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Sonraki</span>
+            </a>
+        </div>
+
+        <!-- Genel İlanlar -->
+        <h2 class="section-title">Tüm İlanlar</h2>
+        <div class="infinite-scroll" id="generalListings">
+            <!-- Örnek Kartlar -->
+            <div class="card">
+                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="İlan">
+                <div class="card-body">
+                    <h5 class="card-title">Drone Model X</h5>
+                    <p class="card-text">Fiyat: 5000 TL</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="İlan">
+                <div class="card-body">
+                    <h5 class="card-title">Drone Model Y</h5>
+                    <p class="card-text">Fiyat: 4500 TL</p>
+                </div>
+            </div>
+            <!-- Daha fazla kart infinite scroll ile yüklenecek -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Infinite Scroll için basit bir örnek
+        let page = 1;
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                loadMoreListings();
+            }
+        });
+
+        function loadMoreListings() {
+            page++;
+            const generalListings = document.getElementById('generalListings');
+            for (let i = 0; i < 4; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="İlan">
+                    <div class="card-body">
+                        <h5 class="card-title">Yeni Drone Model ${page}-${i}</h5>
+                        <p class="card-text">Fiyat: ${4000 + i * 500} TL</p>
+                    </div>
+                `;
+                generalListings.appendChild(card);
+            }
+        }
+    </script>
+</body>
+</html>

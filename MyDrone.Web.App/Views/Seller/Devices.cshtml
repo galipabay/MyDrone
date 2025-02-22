@@ -1,0 +1,45 @@
+﻿@model List<DeviceViewModel> <!-- Model olarak cihazları listeleyen bir ViewModel kullanıyoruz -->
+
+@{
+    ViewData["Title"] = "Ürünlerim";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Ürünlerim</h2>
+
+    <a href="@Url.Action("DeviceAdd", "Seller")" class="btn btn-primary mb-3">Ürün Ekle</a>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Ürün Adı</th>
+                    <th>Kategori</th>
+                    <th>Fiyat</th>
+                    <th>Stok</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var device in Model)
+                {
+                    <tr>
+                        <td>@device.Name</td>
+                        <td>@device.Category</td>
+                        <td>@device.Price ₺</td>
+                        <td>@device.Stock</td>
+                        <td>
+                            <a href="@Url.Action("EditDevice", "Seller", new { id = device.Id })" class="btn btn-warning btn-sm">Düzenle</a>
+                            <a href="@Url.Action("DeleteDevice", "Seller", new { id = device.Id })" class="btn btn-danger btn-sm">Sil</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Henüz eklenmiş bir ürün bulunmamaktadır.</p>
+    }
+</div>

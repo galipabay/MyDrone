@@ -18,7 +18,7 @@
         .navbar {
             background-color: #213952;
             z-index: 1050; /* Sidebar'dan daha yüksek olmalı */
-            position: fixed; /* Üstte sabitlenir */
+            position: sticky; /* Üstte sabitlenir */
             width: 100%;
             top: 0;
             padding: 10px 20px;
@@ -101,7 +101,7 @@
         /* Ana içerik alanı */
         .main-content {
             margin-left: 60px;
-            padding-top: 70px; /* Navbar yüksekliği kadar boşluk */
+            padding-top: 60px; /* Navbar yüksekliği kadar boşluk */
             transition: margin-left 0.3s ease-in-out;
         }
 
@@ -128,7 +128,7 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-dark w-100">
-        <a class="navbar-brand" href="#">MyDrone</a>
+        <a class="navbar-brand" href="@Url.Action("Index", "Home")">MyDrone</a>
         <div class="d-flex align-items-center">
             <form class="form-inline">
                 <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
@@ -159,8 +159,10 @@
         <div class="sidebar" id="sidebar">
             <ul class="list-group">
                 <li class="list-group-item d-flex align-items-center">
-                    <i class="fas fa-box-open mr-2"></i>
-                    <span class="menu-text">Ürünlerim</span>
+                    <a href="@Url.Action("Devices", "Seller")" class="d-flex align-items-center" style="color: white; text-decoration: none;">
+                        <i class="fas fa-box-open mr-2"></i>
+                        <span class="menu-text">Ürünlerim</span>
+                    </a>
                 </li>
                 <li class="list-group-item d-flex align-items-center">
                     <i class="fas fa-bell mr-2"></i>
@@ -174,49 +176,6 @@
         </div>
     }
 
-    <style>
-
-        .sidebar .list-group-item {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap; /* Metni taşırmaz */
-
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .menu-text {
-            display: none;
-            white-space: nowrap;
-        }
-
-        .sidebar.open .list-group-item {
-            overflow: visible;
-            white-space: normal;
-        }
-
-        .sidebar.open .menu-text {
-            display: inline-block;
-            margin-left: 10px;
-        }
-    </style>
-
-    <script>
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const icon = document.getElementById('toggle-icon');
-
-            sidebar.classList.toggle('open');
-
-            if (sidebar.classList.contains('open')) {
-                icon.innerHTML = '&#9664;'; // Sol ok
-            } else {
-                icon.innerHTML = '&#9654;'; // Sağ ok
-            }
-        }
-    </script>
-
     <div class="content main-content" id="main-content">
         <div class="menu-toggle-container">
         </div>
@@ -227,8 +186,6 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-
 
     <script>
         function toggleMenu() {
@@ -245,8 +202,6 @@
                 icon.innerHTML = '&#9654;'; // Sağ ok
             }
         }
-
-
     </script>
 </body>
 </html>

@@ -24,33 +24,33 @@ namespace MyDrone.Business.Services
 
         public void SendEmail(string toEmail, string subject, string body)
         {
-            try
+            if (string.IsNullOrEmpty(toEmail))
+                throw new ArgumentNullException(nameof(toEmail), "To email cannot be null or empty.");
+            if (string.IsNullOrEmpty(subject))
+                throw new ArgumentNullException(nameof(subject), "Subject cannot be null or empty.");
+            if (string.IsNullOrEmpty(body))
+                throw new ArgumentNullException(nameof(body), "Body cannot be null or empty.");
+
+            var smtpClient = new SmtpClient(_smtpHost)
             {
-                var smtpClient = new SmtpClient(_smtpHost)
-                {
-                    Port = _smtpPort,
-                    Credentials = new NetworkCredential(_username, _password),
-                    EnableSsl = true,
-                };
+                Port = _smtpPort,
+                Credentials = new NetworkCredential(_username, "wvhu bwsh xqyo ghqa"),
+                EnableSsl = true,
+            };
 
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress(_username),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = true
-                };
-
-                mailMessage.To.Add(toEmail);
-
-                smtpClient.Send(mailMessage);
-            }
-            catch (Exception ex)
+            var mailMessage = new MailMessage
             {
-                // Hata mesajını loglayabiliriz
-                Console.WriteLine($"E-posta gönderme hatası: {ex.Message}");
-                throw;
-            }
+                From = new MailAddress(_username),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(toEmail);
+            smtpClient.Send(mailMessage);
         }
+
+
+        
     }
 }
