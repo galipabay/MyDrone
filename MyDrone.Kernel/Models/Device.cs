@@ -11,6 +11,15 @@ namespace MyDrone.Kernel.Models
 
 		#region Propertities
 
+		private int userId;
+
+		public int UserId
+		{
+			get { return userId; }
+			set { userId = value; }
+		}
+
+
 		private int deviceNo;
 
 		public int DeviceNo
@@ -162,6 +171,23 @@ namespace MyDrone.Kernel.Models
 			get { return street; }
 			set { street = value; }
 		}
+
+		private int price;
+
+		public int Price
+		{
+			get { return price; }
+			set { price = value; }
+		}
+
+		private bool status;
+
+		public bool Status
+		{
+			get { return status; }
+			set { status = value; }
+		}
+
 
 		#endregion
 	}

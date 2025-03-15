@@ -1,8 +1,5 @@
-﻿@model List<DeviceViewModel> <!-- Model olarak cihazları listeleyen bir ViewModel kullanıyoruz -->
+﻿@model List<MyDrone.Kernel.Models.Device>
 
-@{
-    ViewData["Title"] = "Ürünlerim";
-}
 
 <div class="container mt-4">
     <h2 class="mb-4">Ürünlerim</h2>
@@ -11,35 +8,64 @@
 
     @if (Model != null && Model.Any())
     {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Ürün Adı</th>
-                    <th>Kategori</th>
-                    <th>Fiyat</th>
-                    <th>Stok</th>
-                    <th>İşlemler</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var device in Model)
-                {
-                    <tr>
-                        <td>@device.Name</td>
-                        <td>@device.Category</td>
-                        <td>@device.Price ₺</td>
-                        <td>@device.Stock</td>
-                        <td>
-                            <a href="@Url.Action("EditDevice", "Seller", new { id = device.Id })" class="btn btn-warning btn-sm">Düzenle</a>
-                            <a href="@Url.Action("DeleteDevice", "Seller", new { id = device.Id })" class="btn btn-danger btn-sm">Sil</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="device-list">
+            @foreach (var device in Model)
+            {
+                <a href="@Url.Action("DeviceDetail", "Seller", new { id = device.Id })" class="device-card">
+                    <div class="device-image">
+                        <!-- Ürün görseli burada olacak -->
+                        <img src="@device.Image" alt="@device.Brand @device.Model">
+                    </div>
+                    <div class="device-info">
+                        <p><strong>@device.Brand</strong></p>
+                        <p>@device.Model</p>
+                        <p>Kiralık / Satılık: @device.Status</p>
+                        <p>Fiyat: @device.Price TL</p>
+                        <p>Uçuş Süresi: @device.AirTime dk</p>
+                        <p>Menzil: @device.Range km</p>
+                    </div>
+                </a>
+            }
+        </div>
     }
     else
     {
         <p>Henüz eklenmiş bir ürün bulunmamaktadır.</p>
     }
 </div>
+
+<style>
+    .device-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .device-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+        transition: 0.3s;
+    }
+
+        .device-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .device-image img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 15px;
+    }
+
+    .device-info p {
+        margin: 5px 0;
+    }
+</style>

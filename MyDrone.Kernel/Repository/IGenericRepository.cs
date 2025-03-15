@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyDrone.Kernel.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,6 +19,8 @@ namespace MyDrone.Kernel.Repository
 		void Update(T entity);
 		void Remove(T entity);
 		void RemoveRange(IEnumerable<T> entities);
-		//Task AuthenticateAsync(T entity);
+        Task<User?> AuthenticateAsync(string identifier, string password);
+        Task SoftDeleteAsync(T entity);
+		Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize);
 	}
 }

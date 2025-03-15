@@ -8,6 +8,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Principal;
+using MyDrone.Kernel.Models;
 
 namespace MyDrone.Business.Services
 {
@@ -47,14 +49,12 @@ namespace MyDrone.Business.Services
 
         public async Task<T> GetByIdAsync(int id)
         {
-            var has = await _repository.GetByIdAsync(id);
-            /*
-            if (has == null)
+            var entity = await _repository.GetByIdAsync(id);
+            if (entity == null)
             {
-                throw new NotFoundExcepiton($"{typeof(T).Name}({id}) not found");
+                throw new Exception($"{typeof(T).Name} with ID {id} not found.");
             }
-            */
-            return has;
+            return entity;
         }
 
         public async Task RemoveAsync(T entity)
@@ -79,5 +79,66 @@ namespace MyDrone.Business.Services
         {
             return _repository.Where(expression);
         }
+
+        public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            return await _repository.GetPagedAsync(pageNumber, pageSize);
+        }
+        public async Task<int> GetCountAsync()
+        {
+            return await _repository.GetAll().CountAsync();
+        }
+        public async Task<T> GetSingleAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _repository.Where(expression).FirstOrDefaultAsync();
+        }
+        public async Task<int> ExecuteSqlRawAsync(string sql, params object[] parameters)
+        {
+            return await _unitOfWork.ExecuteSqlRawAsync(sql, parameters);
+        }
+        public async Task ExecuteInTransactionAsync(Func<Task> action)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                await action();
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+        public async Task<IEnumerable<T>> SearchAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _repository.Where(expression).ToListAsync();
+        }
+        public async Task SoftDeleteAsync(int id)
+        {
+            // Öncelikle entity'yi repository üzerinden alın
+            var entity = await _repository.GetByIdAsync(id);
+            if (entity != null)
+            {
+                // BaseEntity'deki IsDeleted ve DeletedDate alanlarına erişim sağlanır
+                if (entity is BaseEntity baseEntity)
+                {
+                    baseEntity.IsDeleted = true;
+                    baseEntity.DeletedDate = DateTime.UtcNow;
+                    _repository.Update(entity); // Entity'yi güncelle
+                    await _unitOfWork.CommitAsync(); // Değişiklikleri kaydet
+                }
+                else
+                {
+                    throw new Exception($"Entity does not implement {nameof(BaseEntity)}.");
+                }
+            }
+            else
+            {
+                throw new Exception($"{typeof(T).Name} with ID {id} not found.");
+            }
+        }
+
+
     }
 }

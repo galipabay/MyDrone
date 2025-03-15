@@ -21,17 +21,16 @@ namespace MyDrone.Types
 		}
 
 		public DbSet<User> User { get; set; }
-
 		public DbSet<UserDto> UserDtos { get; set; }
 		public DbSet<Device> Device { get; set; }
+		public DbSet<DeviceDto> DeviceDtos { get; set; }
+		public DbSet<DeviceAttributes> DeviceAttributes { get; set; }
 
-        public DbSet<DeviceDto> DeviceDtos { get; set; }
-
-        //string connectionString = "Data Source=GALIPABAY;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-        string connectionString = "Data Source=DESKTOP-Q0BKLV1;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+		//string connectionString = "Data Source=GALIPABAY;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+		string connectionString = "Data Source=DESKTOP-Q0BKLV1;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseSqlServer(connectionString, builder =>
 			{
@@ -49,6 +48,24 @@ namespace MyDrone.Types
 		{
 			modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 			base.OnModelCreating(modelBuilder);
+
+			// User entity'si için yapılandırma
+			modelBuilder.Entity<User>()
+				.Property(u => u.IsDeleted)
+				.HasDefaultValue(false);  // Varsayılan olarak false (silinmedi)
+
+			modelBuilder.Entity<User>()
+				.Property(u => u.DeletedDate)
+				.IsRequired(false);  // Opsiyonel, ancak null olabilir
+
+			// Device entity'si için yapılandırma
+			modelBuilder.Entity<Device>()
+				.Property(d => d.IsDeleted)
+				.HasDefaultValue(false);  // Varsayılan olarak false (silinmedi)
+
+			modelBuilder.Entity<Device>()
+				.Property(d => d.DeletedDate)
+				.IsRequired(false);  // Opsiyonel, ancak null olabilir
 		}
 	}
 }

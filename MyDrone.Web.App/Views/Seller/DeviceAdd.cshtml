@@ -1,113 +1,171 @@
-﻿<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cihaz Ekle</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-        }
+﻿@model MyDrone.Kernel.Models.Device
 
-        .form-container {
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 30px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
+@{
+    ViewData["Title"] = "Cihaz Ekle";
+}
 
-            .form-container:hover {
-                transform: scale(1.02);
-            }
+<h2 class="text-center">@ViewData["Title"]</h2>
 
-        .form-group label {
-            font-weight: bold;
-            color: #495057;
-        }
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow p-4">
+                <form asp-action="DeviceAdd" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <!-- Marka -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Brand" class="control-label"></label>
+                            <input asp-for="Brand" class="form-control" />
+                            <span asp-validation-for="Brand" class="text-danger"></span>
+                        </div>
 
-        .form-control:focus {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
+                        <!-- Model -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Model" class="control-label"></label>
+                            <input asp-for="Model" class="form-control" />
+                            <span asp-validation-for="Model" class="text-danger"></span>
+                        </div>
 
-        .btn-custom {
-            background-color: #007bff;
-            color: #ffffff;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
+                        <!-- Hız -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Speed" class="control-label"></label>
+                            <input asp-for="Speed" class="form-control" type="number" />
+                            <span asp-validation-for="Speed" class="text-danger"></span>
+                        </div>
 
-            .btn-custom:hover {
-                background-color: #0056b3;
-            }
+                        <!-- Havada Kalma Süresi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="AirTime" class="control-label"></label>
+                            <input asp-for="AirTime" class="form-control" type="number" />
+                            <span asp-validation-for="AirTime" class="text-danger"></span>
+                        </div>
 
-        .error-message {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
+                        <!-- Kamera Kalitesi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="CamQuality" class="control-label"></label>
+                            <input asp-for="CamQuality" class="form-control" />
+                            <span asp-validation-for="CamQuality" class="text-danger"></span>
+                        </div>
 
-    <div class="container form-container">
-        <h3 class="text-center mb-4">Cihaz Ekle</h3>
-        <form id="deviceForm" action="/Device/Add" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="deviceName">Cihaz Adı</label>
-                <input type="text" class="form-control" id="deviceName" name="DeviceName" required>
+                        <!-- Gece Görüşü -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="NightVision" class="control-label"></label>
+                            <input asp-for="NightVision" class="form-control" type="checkbox" />
+                            <span asp-validation-for="NightVision" class="text-danger"></span>
+                        </div>
+
+                        <!-- Maksimum İrtifa -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Altitude" class="control-label"></label>
+                            <input asp-for="Altitude" class="form-control" type="number" />
+                            <span asp-validation-for="Altitude" class="text-danger"></span>
+                        </div>
+
+                        <!-- Renk -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Color" class="control-label"></label>
+                            <input asp-for="Color" class="form-control" />
+                            <span asp-validation-for="Color" class="text-danger"></span>
+                        </div>
+
+                        <!-- Menzil -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Range" class="control-label"></label>
+                            <input asp-for="Range" class="form-control" type="number" />
+                            <span asp-validation-for="Range" class="text-danger"></span>
+                        </div>
+
+                        <!-- Yakıt Türü -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="FuelType" class="control-label"></label>
+                            <select asp-for="FuelType" class="form-control">
+                                <option value="1">Gas</option>
+                                <option value="2">Electric</option>
+                                <option value="3">Hybrid</option>
+                            </select>
+                            <span asp-validation-for="FuelType" class="text-danger"></span>
+                        </div>
+
+                        <!-- Fiyat -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Price" class="control-label"></label>
+                            <input asp-for="Price" class="form-control" type="number" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <!-- Açıklama -->
+                        <div class="col-md-12 form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Resim -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Image" class="control-label"></label>
+                            <input asp-for="Image" class="form-control" type="file" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                        </div>
+
+                        <!-- Video -->
+                        <div class="col-md-6 form-group">
+                            <label class="form-control-plaintext">Video Url (YouTube Recommended)</label>
+                            <label asp-for="Video" class="control-label"></label>
+                            <input asp-for="Video" class="form-control" />
+                            <span asp-validation-for="Video" class="text-danger"></span>
+                        </div>
+
+                        <!-- Konum Bilgileri -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Country" class="control-label"></label>
+                            <input asp-for="Country" class="form-control" />
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="City" class="control-label"></label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Province" class="control-label"></label>
+                            <input asp-for="Province" class="form-control" />
+                            <span asp-validation-for="Province" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="District" class="control-label"></label>
+                            <input asp-for="District" class="form-control" />
+                            <span asp-validation-for="District" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Street" class="control-label"></label>
+                            <input asp-for="Street" class="form-control" />
+                            <span asp-validation-for="Street" class="text-danger"></span>
+                        </div>
+
+                        <!-- Cihaz Durumu (Kiralık / Satılık) -->
+                        <div class="col-md-6 form-group">
+                            <label class="control-label">Cihaz Durumu</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="Status" value="true" id="kiralik">
+                                <label class="form-check-label" for="kiralik">Kiralık</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="Status" value="false" id="satilik">
+                                <label class="form-check-label" for="satilik">Satılık</label>
+                            </div>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Cihazı Ekle</button>
+                </form>
+
+                <a href="/devices" class="btn btn-secondary btn-block mt-2">Geri Dön</a>
             </div>
-            <div class="form-group">
-                <label for="deviceModel">Model</label>
-                <input type="text" class="form-control" id="deviceModel" name="DeviceModel" required>
-            </div>
-            <div class="form-group">
-                <label for="serialNumber">Seri Numarası</label>
-                <input type="text" class="form-control" id="serialNumber" name="SerialNumber" required>
-            </div>
-            <div class="form-group">
-                <label for="category">Kategori</label>
-                <select class="form-control" id="category" name="Category">
-                    <option value="Drone">Drone</option>
-                    <option value="Kamera">Kamera</option>
-                    <option value="Aksesuar">Aksesuar</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="price">Fiyat (₺)</label>
-                <input type="number" class="form-control" id="price" name="Price" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Açıklama</label>
-                <textarea class="form-control" id="description" name="Description" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="image">Cihaz Fotoğrafı</label>
-                <input type="file" class="form-control-file" id="image" name="Image" accept="image/*">
-            </div>
-            <button type="submit" class="btn btn-custom btn-block">Cihazı Kaydet</button>
-        </form>
+        </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script>
-        function validateForm() {
-            const deviceName = document.getElementById('deviceName').value;
-            const deviceModel = document.getElementById('deviceModel').value;
-            const serialNumber = document.getElementById('serialNumber').value;
-
-            if (!deviceName || !deviceModel || !serialNumber) {
-                alert('Lütfen tüm zorunlu alanları doldurun.');
-                return false;
-            }
-            return true;
-        }
-    </script>
-</body>
-</html>
+</div>

@@ -24,13 +24,29 @@ namespace MyDrone.Kernel.Models
 			set { createdDate = value; }
 		}
 
-		private DateTime updatedDate;
+		private DateTime? updatedDate;
 
-		public DateTime UpdatedDate
+		public DateTime? UpdatedDate
 		{
 			get { return updatedDate; }
 			set { updatedDate = value; }
 		}
 
+		// Yumuşak silme için eklenen alan
+		private bool isDeleted;
+
+		public bool IsDeleted
+		{
+			get { return isDeleted; }
+			set { isDeleted = value; }
+		}
+
+		private DateTime? deletedDate;
+
+		public DateTime? DeletedDate
+		{
+			get { return deletedDate; }
+			set { deletedDate = value; }
+		}
 	}
 }

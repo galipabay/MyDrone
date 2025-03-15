@@ -373,8 +373,7 @@ namespace MyDrone.Web.App.Controllers
 
         #endregion
 
-
-
+        
         public IActionResult SendEmail()
         {
             _emailService.SendEmail("example@example.com", "Test Subject", "Test Body");

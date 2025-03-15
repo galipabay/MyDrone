@@ -6,6 +6,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using MyDrone.Kernel.Models;
+using BCrypt.Net;
 
 namespace MyDrone.Types.Repositories
 {
@@ -19,12 +21,10 @@ namespace MyDrone.Types.Repositories
 			_context = context;
 			_dbSet = context.Set<T>();
 		}
-
 		public async Task AddAsync(T entity)
 		{
 			await _dbSet.AddAsync(entity);
 		}
-
 		public async Task AddRangeAsync(IEnumerable<T> entities)
 		{
 			await _dbSet.AddRangeAsync(entities);
@@ -33,19 +33,24 @@ namespace MyDrone.Types.Repositories
 		{
 			return await _dbSet.AnyAsync(expression);
 		}
+		public async Task<IEnumerable<T>> GetAllAsync<T>() where T : class
+		{
+			return await _context.Set<T>().ToListAsync();
+		}
+		public async Task<User?> AuthenticateAsync(string identifier, string password)
+		{
+			var user = await _context.User
+				.AsNoTracking()
+				.SingleOrDefaultAsync(x => x.MailAddress == identifier || x.TelNo == identifier);
 
-		//public Task AuthenticateAsync(T entity,)
-		//{
-		//	// Şifreyi hashleyip karşılaştırmak daha güvenli bir yaklaşım olur
-		//	var user = await _context.Users.SingleOrDefaultAsync(x => x.Username == username && x.Password == password);
+			if (user is null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
+			{
+				await Task.Delay(300); // Brute-force saldırılarına karşı gecikme ekleyelim
+				return null;
+			}
 
-		//	if (user == null)
-		//	{
-		//		return null;
-		//	}
-
-		//	return user;
-		//}
+			return user;
+		}
 
 		/// <summary>
 		/// AsNoTracking ef core cektigi datalari memory'e almayip ve daha optimize calismasini saglar.
@@ -62,7 +67,7 @@ namespace MyDrone.Types.Repositories
 			return await _dbSet.FindAsync(id);
 		}
 
-		public void Remove(T entity)
+		public void Remove(T entity) 
 		{
 			_dbSet.Remove(entity);
 		}
@@ -79,6 +84,28 @@ namespace MyDrone.Types.Repositories
 		public IQueryable<T> Where(Expression<Func<T, bool>> expression)
 		{
 			return _dbSet.Where(expression);
+		}
+
+		// Soft delete işlemi
+		public async Task SoftDeleteAsync(T entity)
+		{
+			//galip
+			//var entity = await _dbSet.FindAsync(id);
+			if (entity != null)
+			{
+				// IsDeleted flag'ını true yapıyoruz
+				_context.Entry(entity).Property("IsDeleted").CurrentValue = true;
+				// Silinme tarihini kaydediyoruz
+				_context.Entry(entity).Property("DeletedDate").CurrentValue = DateTime.UtcNow;
+				await _context.SaveChangesAsync();
+			}
+		}
+		public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
+		{
+			return await _dbSet.Skip((pageNumber - 1) * pageSize)
+							   .Take(pageSize)
+							   .AsNoTracking()
+							   .ToListAsync();
 		}
 	}
 }
