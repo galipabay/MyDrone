@@ -1,4 +1,16 @@
-﻿@model MyDrone.Kernel.Models.Device
+﻿<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+@model MyDrone.Kernel.Models.Device
 
 @{
     ViewData["Title"] = "Cihaz Ekle";
@@ -10,145 +22,128 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow p-4">
-                <form asp-action="DeviceAdd" method="post" enctype="multipart/form-data">
-                    <div class="row">
-                        <!-- Marka -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="Brand" class="control-label"></label>
-                            <input asp-for="Brand" class="form-control" />
-                            <span asp-validation-for="Brand" class="text-danger"></span>
-                        </div>
 
+                <!-- MARKA SEÇİM FORMU -->
+                <form method="get">
+                    <div class="col-md-6 form-group">
+                        <label>Marka Seç</label>
+                        <select name="selectedBrand" class="form-control" asp-items="ViewBag.Brands"
+                                onchange="this.form.submit()">
+                            <option value="">Bir Marka Seçin</option>
+                        </select>
+                    </div>
+                </form>
+
+                <!-- CİHAZ EKLEME FORMU (POST) -->
+                <form id="deviceForm" asp-action="DeviceAdd" method="post" enctype="multipart/form-data">
+                    <div class="row">
                         <!-- Model -->
                         <div class="col-md-6 form-group">
-                            <label asp-for="Model" class="control-label"></label>
-                            <input asp-for="Model" class="form-control" />
-                            <span asp-validation-for="Model" class="text-danger"></span>
+                            <label asp-for="Model">Model Seç</label>
+                            <select asp-for="Model" class="form-control" asp-items="ViewBag.Models">
+                                <option value="">Önce Marka Seçin</option>
+                            </select>
                         </div>
 
-                        <!-- Hız -->
                         <div class="col-md-6 form-group">
-                            <label asp-for="Speed" class="control-label"></label>
-                            <input asp-for="Speed" class="form-control" type="number" />
-                            <span asp-validation-for="Speed" class="text-danger"></span>
-                        </div>
-
-                        <!-- Havada Kalma Süresi -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="AirTime" class="control-label"></label>
-                            <input asp-for="AirTime" class="form-control" type="number" />
-                            <span asp-validation-for="AirTime" class="text-danger"></span>
-                        </div>
-
-                        <!-- Kamera Kalitesi -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="CamQuality" class="control-label"></label>
-                            <input asp-for="CamQuality" class="form-control" />
-                            <span asp-validation-for="CamQuality" class="text-danger"></span>
-                        </div>
-
-                        <!-- Gece Görüşü -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="NightVision" class="control-label"></label>
-                            <input asp-for="NightVision" class="form-control" type="checkbox" />
-                            <span asp-validation-for="NightVision" class="text-danger"></span>
-                        </div>
-
-                        <!-- Maksimum İrtifa -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="Altitude" class="control-label"></label>
-                            <input asp-for="Altitude" class="form-control" type="number" />
-                            <span asp-validation-for="Altitude" class="text-danger"></span>
-                        </div>
-
-                        <!-- Renk -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="Color" class="control-label"></label>
-                            <input asp-for="Color" class="form-control" />
-                            <span asp-validation-for="Color" class="text-danger"></span>
-                        </div>
-
-                        <!-- Menzil -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="Range" class="control-label"></label>
-                            <input asp-for="Range" class="form-control" type="number" />
-                            <span asp-validation-for="Range" class="text-danger"></span>
-                        </div>
-
-                        <!-- Yakıt Türü -->
-                        <div class="col-md-6 form-group">
-                            <label asp-for="FuelType" class="control-label"></label>
+                            <label>Yakıt Türü</label>
                             <select asp-for="FuelType" class="form-control">
-                                <option value="1">Gas</option>
-                                <option value="2">Electric</option>
-                                <option value="3">Hybrid</option>
+                                <option value="">Seçiniz</option>
+                                <option value="1">Hybrid</option>
+                                <option value="2">Elektrik</option>
+                                <option value="3">Benzin</option>
                             </select>
                             <span asp-validation-for="FuelType" class="text-danger"></span>
                         </div>
 
+                        <!-- Hız -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Speed"></label>
+                            <input asp-for="Speed" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Uçuş Süresi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="AirTime"></label>
+                            <input asp-for="AirTime" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Kamera Kalitesi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="CamQuality"></label>
+                            <input asp-for="CamQuality" class="form-control" />
+                        </div>
+
+                        <!-- Gece Görüşü -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="NightVision"></label>
+                            <input asp-for="NightVision" class="form-control" type="checkbox" />
+                        </div>
+
+                        <!-- İrtifa -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Altitude"></label>
+                            <input asp-for="Altitude" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Renk (Color Picker) -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Color"></label>
+                            <input asp-for="Color" class="form-control" type="color" />
+                        </div>
+
                         <!-- Fiyat -->
                         <div class="col-md-6 form-group">
-                            <label asp-for="Price" class="control-label"></label>
+                            <label asp-for="Price"></label>
                             <input asp-for="Price" class="form-control" type="number" />
-                            <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
 
-                        <!-- Açıklama -->
-                        <div class="col-md-12 form-group">
-                            <label asp-for="Description" class="control-label"></label>
-                            <textarea asp-for="Description" class="form-control"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-
-                        <!-- Resim -->
+                        <!-- Video URL -->
                         <div class="col-md-6 form-group">
-                            <label asp-for="Image" class="control-label"></label>
-                            <input asp-for="Image" class="form-control" type="file" />
-                            <span asp-validation-for="Image" class="text-danger"></span>
-                        </div>
-
-                        <!-- Video -->
-                        <div class="col-md-6 form-group">
-                            <label class="form-control-plaintext">Video Url (YouTube Recommended)</label>
-                            <label asp-for="Video" class="control-label"></label>
-                            <input asp-for="Video" class="form-control" />
+                            <label>Video URL</label>
+                            <input type="url" asp-for="Video" class="form-control" />
                             <span asp-validation-for="Video" class="text-danger"></span>
                         </div>
 
-                        <!-- Konum Bilgileri -->
+                        <!-- Resim Yükleme -->
                         <div class="col-md-6 form-group">
-                            <label asp-for="Country" class="control-label"></label>
-                            <input asp-for="Country" class="form-control" />
-                            <span asp-validation-for="Country" class="text-danger"></span>
+                            <label>Resim Yükle</label>
+                            <input type="file" asp-for="Image" class="form-control" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                        </div>
+
+                        <!-- Harita Konfigürasyonu -->
+                        <div id="map" style="width: 100%; height: 500px;"></div>
+
+                        <!-- Adres Bilgileri -->
+                        <div class="col-md-6 form-group">
+                            <label for="Country">Ülke</label>
+                            <input type="text" id="Country" class="form-control" readonly />
                         </div>
 
                         <div class="col-md-6 form-group">
-                            <label asp-for="City" class="control-label"></label>
-                            <input asp-for="City" class="form-control" />
-                            <span asp-validation-for="City" class="text-danger"></span>
+                            <label for="City">Şehir</label>
+                            <input type="text" id="City" class="form-control" readonly />
                         </div>
 
                         <div class="col-md-6 form-group">
-                            <label asp-for="Province" class="control-label"></label>
-                            <input asp-for="Province" class="form-control" />
-                            <span asp-validation-for="Province" class="text-danger"></span>
+                            <label for="District">İlçe</label>
+                            <input type="text" id="District" class="form-control" readonly />
                         </div>
 
                         <div class="col-md-6 form-group">
-                            <label asp-for="District" class="control-label"></label>
-                            <input asp-for="District" class="form-control" />
-                            <span asp-validation-for="District" class="text-danger"></span>
+                            <label for="Street">Cadde</label>
+                            <input type="text" id="Street" class="form-control" readonly />
                         </div>
 
                         <div class="col-md-6 form-group">
-                            <label asp-for="Street" class="control-label"></label>
-                            <input asp-for="Street" class="form-control" />
-                            <span asp-validation-for="Street" class="text-danger"></span>
+                            <label for="Province">Bölge/İl</label>
+                            <input type="text" id="Province" class="form-control" readonly />
                         </div>
 
-                        <!-- Cihaz Durumu (Kiralık / Satılık) -->
+                        <!-- Cihaz Durumu -->
                         <div class="col-md-6 form-group">
-                            <label class="control-label">Cihaz Durumu</label>
+                            <label>Cihaz Durumu</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" asp-for="Status" value="true" id="kiralik">
                                 <label class="form-check-label" for="kiralik">Kiralık</label>
@@ -157,7 +152,6 @@
                                 <input class="form-check-input" type="radio" asp-for="Status" value="false" id="satilik">
                                 <label class="form-check-label" for="satilik">Satılık</label>
                             </div>
-                            <span asp-validation-for="Status" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -169,3 +163,157 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelector("[name='selectedBrand']").value = "@ViewData["SelectedBrand"]";
+</script>
+
+<script>
+            const apiKey = "YOUR_OPENCAGE_API_KEY"; // OpenCage API anahtarını buraya ekle
+
+            function reverseGeocode(lat, lng) {
+                const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&language=tr`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results.length > 0) {
+                            const address = data.results[0].components;
+
+                            document.getElementById('Country').value = address.country || "";
+                            document.getElementById('City').value = address.city || address.town || address.state || "";
+                            document.getElementById('District').value = address.suburb || address.county || "";
+                            document.getElementById('Street').value = address.road || "";
+                            document.getElementById('Province').value = address.state || "";
+                        }
+                    })
+                    .catch(error => console.error("Geocode error:", error));
+            }
+
+            window.onload = function() {
+            // Harita Başlangıç Konumu
+            var map = L.map('map').setView([51.505, -0.09], 13); // Başlangıçta harita konumunu belirliyoruz
+
+            // OpenStreetMap Katmanı
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            // Tıklama Olayını Dinleme
+            map.on('click', function(e) {
+                reverseGeocode(e.latlng.lat, e.latlng.lng); // Tıklanan yeri tersine geocode et)
+                var latlng = e.latlng; // Tıklanan yerin koordinatları
+                console.log("Koordinatlar: ", latlng); // Koordinatları konsola yazdırıyoruz
+
+                // Reverse Geocoding işlemi (tıklanan koordinatları adres bilgilerine dönüştürme)
+                var geocoder = L.Control.Geocoder.nominatim();
+                geocoder.reverse(latlng, map.options.crs.scale(map.getZoom()), function(results) {
+                    var result = results[0]; // İlk sonucu al
+
+                    if (result) {
+                        var address = result.address;
+                        console.log("tikAdres: ", address); // Adres bilgilerini konsola yazdırıyoruz
+
+                        // Haritaya işaretçi ekleyelim
+                        L.marker(latlng).addTo(map)
+                            .bindPopup('Seçilen adres: ' + address.display_name)
+                            .openPopup();
+
+
+                // **GEOCODE VERİLERİ KONTROLÜ**
+                var addressData = e.geocode.properties || {};
+                var address = addressData.address || {}; // Eğer yoksa boş nesne olarak tanımla
+
+                console.log("Adres verisi:", address);
+
+                // **NULL HATASINI ÖNLEMEK İÇİN INPUT SEÇİCİ KONTROLLERİ**
+                function setValue(selector, value) {
+                    var input = document.querySelector(selector);
+                    if (input) input.value = value || ''; // Eğer input varsa değeri ayarla, yoksa boş bırak
+                }
+
+                function getCity(address) {
+                    return address.city || address.town || address.county || address.state || "";
+                }
+
+                function getDistrict(address) {
+                    return address.suburb || address.district || address.borough || "";
+                }
+
+                function getStreet(address) {
+                    return address.road || address.pedestrian || address.footway || address.highway || "";
+                }
+
+                function getProvince(address) {
+                    return address.state || address.region || "";
+                }
+
+                // **INPUT'LARA GÜVENLİ YAZMA**
+                setValue('#Country', address.country);
+                setValue('#City', getCity(address));
+                setValue('#District', getDistrict(address));
+                setValue('#Street', getStreet(address));
+                setValue('#Province', getProvince(address));
+                setValue('#PostalCode', address.postcode);
+                    }
+                });
+            });
+
+            // Sürükleme sırasında olayı engelleme (isteğe bağlı)
+            map.dragging.enable(); // Sürükleme özelliğini aktif hale getiriyoruz
+            // Geocoder (Arama) Kontrolü
+        var geocoder = L.Control.Geocoder.nominatim();
+        var searchControl = L.Control.geocoder({
+            geocoder: geocoder
+        }).addTo(map);
+
+        // Arama yapıldığında adresi işaretleyip formu doldurma
+        searchControl.on('markgeocode', function(e) {
+            var latlng = e.geocode.center;
+            console.log("Arama sonucu koordinatlar: ", latlng); // Arama sonucunun koordinatları
+
+            //Geocode bilgilerini kontrolu
+            console.log(" arama adres bilgileri:",e.geocode);
+
+            // Haritaya işaretçi ekleyelim
+            L.marker(latlng).addTo(map).bindPopup('Seçilen adres: ' + e.geocode.name).openPopup();
+
+        // **GEOCODE VERİLERİ KONTROLÜ**
+                var addressData = e.geocode.properties || {};
+                var address = addressData.address || {}; // Eğer yoksa boş nesne olarak tanımla
+
+                console.log("Adres verisi:", address);
+
+                // **NULL HATASINI ÖNLEMEK İÇİN INPUT SEÇİCİ KONTROLLERİ**
+                function setValue(selector, value) {
+                    var input = document.querySelector(selector);
+                    if (input) input.value = value || ''; // Eğer input varsa değeri ayarla, yoksa boş bırak
+                }
+
+                function getCity(address) {
+                    return address.city || address.town || address.county || address.state || "";
+                }
+
+                function getDistrict(address) {
+                    return address.suburb || address.district || address.borough || "";
+                }
+
+                function getStreet(address) {
+                    return address.road || address.pedestrian || address.footway || address.highway || "";
+                }
+
+                function getProvince(address) {
+                    return address.state || address.region || "";
+                }
+
+                // **INPUT'LARA GÜVENLİ YAZMA**
+                setValue('#Country', address.country);
+                setValue('#City', getCity(address));
+                setValue('#District', getDistrict(address));
+                setValue('#Street', getStreet(address));
+                setValue('#Province', getProvince(address));
+                setValue('#PostalCode', address.postcode);
+        });
+    };
+</script>

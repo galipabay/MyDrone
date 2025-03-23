@@ -22,6 +22,8 @@ namespace MyDrone.Web.App.Controllers
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IService<Device> _sellerDeviceService;
+        private readonly IDeviceService _deviceService;
 
 
         /// <summary>
@@ -39,7 +41,25 @@ namespace MyDrone.Web.App.Controllers
             _emailService = emailService;
 
         }
+        #region Index
+        public async Task<IActionResult> Index()
+        {
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var devices = await _context.Device.ToListAsync();
 
+            // Kullanıcı favorileri kontrol edilecek
+            var favoriteDeviceIds = _context.Favorite.Where(f => f.UserId == userId).Select(f => f.DeviceId).ToList();
+
+            var viewModel = devices.Select(device => new DeviceDetailViewModel
+            {
+                Device = device,
+                IsFavorited = favoriteDeviceIds.Contains(device.Id),
+                IsSeller = device.UserId == userId // Seller kontrolü
+            }).ToList();
+
+            return View(viewModel);
+        }
+        #endregion
         #region Login
 
         // GET: User/Login
@@ -378,81 +398,6 @@ namespace MyDrone.Web.App.Controllers
         {
             _emailService.SendEmail("example@example.com", "Test Subject", "Test Body");
             return View();
-        }
-
-        // GET: UserDtoController
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        // GET: UserDtoController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: UserDtoController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: UserDtoController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UserDtoController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: UserDtoController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UserDtoController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UserDtoController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
         }
     }
 }

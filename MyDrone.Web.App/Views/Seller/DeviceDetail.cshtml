@@ -1,4 +1,5 @@
-﻿@model MyDrone.Kernel.Models.Device
+﻿@using System.Security.Claims
+@model DeviceDetailViewModel
 
 @{
     ViewData["Title"] = "Device Details";
@@ -6,35 +7,48 @@
 
 <div class="container">
     <div class="details-container">
-        <h2>@Model.Brand @Model.Model</h2>
+        <h2>@Model.Device.Brand @Model.Device.Model</h2>
 
-        <a href="@Url.Action("EditDevice", "Seller")" class="btn btn-secondary">Düzenle</a>
-        <a href="@Url.Action("DeleteDevice", "Seller")" class="btn btn-secondary">Sil</a>
+        <!-- Sadece seller kullanıcıları için butonlar -->
+        @if (Model.IsSeller)
+        {
+            <a href="@Url.Action("EditDevice", "Seller")" class="btn btn-secondary">Düzenle</a>
+            <a href="@Url.Action("DeleteDevice", "Seller")" class="btn btn-secondary">Sil</a>
+        }
+
+        <!-- Favori butonu, eğer kullanıcı seller ise görünmesin -->
+        @if (!Model.IsSeller)
+        {
+            <button id="favoriteButton" class="btn btn-outline-danger">
+                <i class="fa @(Model.IsFavorited ? "fa-heart" : "fa-heart-o")" aria-hidden="true"></i> Favoriye Ekle
+            </button>
+        }
+
         <table class="table">
             <tbody>
-                <tr><th>Device Number</th><td>@Model.DeviceNo</td></tr>
-                <tr><th>Speed</th><td>@Model.Speed km/h</td></tr>
-                <tr><th>Air Time</th><td>@Model.AirTime min</td></tr>
-                <tr><th>Camera Quality</th><td>@Model.CamQuality</td></tr>
-                <tr><th>Night Vision</th><td>@(Model.NightVision ? "Yes" : "No")</td></tr>
-                <tr><th>Altitude</th><td>@Model.Altitude m</td></tr>
-                <tr><th>Color</th><td>@Model.Color</td></tr>
-                <tr><th>Range</th><td>@Model.Range km</td></tr>
-                <tr><th>Fuel Type</th><td>@Model.FuelType</td></tr>
-                <tr><th>Price</th><td>$@Model.Price</td></tr>
-                <tr><th>Status</th><td>@(Model.Status ? "Kiralık" : "Satılık")</td></tr>
-                <tr><th>Country</th><td>@Model.Country</td></tr>
-                <tr><th>City</th><td>@Model.City</td></tr>
-                <tr><th>Province</th><td>@Model.Province</td></tr>
-                <tr><th>District</th><td>@Model.District</td></tr>
-                <tr><th>Street</th><td>@Model.Street</td></tr>
-                <tr><th>Description</th><td>@Model.Description</td></tr>
+                <tr><th>Device Number</th><td>@Model.Device.DeviceNo</td></tr>
+                <tr><th>Speed</th><td>@Model.Device.Speed km/h</td></tr>
+                <tr><th>Air Time</th><td>@Model.Device.AirTime min</td></tr>
+                <tr><th>Camera Quality</th><td>@Model.Device.CamQuality</td></tr>
+                <tr><th>Night Vision</th><td>@(Model.Device.NightVision ? "Yes" : "No")</td></tr>
+                <tr><th>Altitude</th><td>@Model.Device.Altitude m</td></tr>
+                <tr><th>Color</th><td>@Model.Device.Color</td></tr>
+                <tr><th>Range</th><td>@Model.Device.Range km</td></tr>
+                <tr><th>Fuel Type</th><td>@Model.Device.FuelType</td></tr>
+                <tr><th>Price</th><td>$@Model.Device.Price</td></tr>
+                <tr><th>Status</th><td>@(Model.Device.Status ? "Kiralık" : "Satılık")</td></tr>
+                <tr><th>Country</th><td>@Model.Device.Country</td></tr>
+                <tr><th>City</th><td>@Model.Device.City</td></tr>
+                <tr><th>Province</th><td>@Model.Device.Province</td></tr>
+                <tr><th>District</th><td>@Model.Device.District</td></tr>
+                <tr><th>Street</th><td>@Model.Device.Street</td></tr>
+                <tr><th>Description</th><td>@Model.Device.Description</td></tr>
                 <tr>
                     <th>Image</th>
                     <td>
-                        @if (Model.Image != null && Model.Image.Length > 0)
+                        @if (@Model.Device.Image != null && @Model.Device.Image.Length > 0)
                         {
-                            <img src="data:image/png;base64,@Convert.ToBase64String(Model.Image)" alt="Device Image" style="max-width:200px;" />
+                            <img src="data:image/png;base64,@Convert.ToBase64String(@Model.Device.Image)" alt="Device Image" style="max-width:200px;" />
                         }
                         else
                         {
@@ -45,10 +59,10 @@
                 <tr>
                     <th>Video</th>
                     <td>
-                        @if (!string.IsNullOrEmpty(Model.Video))
+                        @if (!string.IsNullOrEmpty(@Model.Device.Video))
                         {
                             <video width="320" height="240" controls>
-                                <source src="@Model.Video" type="video/mp4">
+                                <source src="@Model.Device.Video" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                         }
@@ -64,3 +78,33 @@
 
     <a href="@Url.Action("Devices", "Seller")" class="btn btn-secondary">Ürünlerime Geri Dön</a>
 </div>
+
+<!-- AJAX ve JavaScript -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#favoriteButton").click(function () {
+                var deviceId = @Model.Device.Id;  // Cihazın ID'si
+                var userId = @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                $.ajax({
+                    url: '@Url.Action("ToggleFavorite", "Device")',
+                    type: 'POST',
+                    data: {
+                        deviceId: deviceId,
+                        userId: userId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Favori durumu başarılı şekilde güncellendi
+                            var iconClass = response.isFavorited ? 'fa-heart' : 'fa-heart-o';
+                            $("#favoriteButton i").removeClass("fa-heart fa-heart-o").addClass(iconClass);
+                        } else {
+                            alert("Bir hata oluştu, lütfen tekrar deneyin.");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

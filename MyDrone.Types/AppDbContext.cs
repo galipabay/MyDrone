@@ -25,6 +25,7 @@ namespace MyDrone.Types
 		public DbSet<Device> Device { get; set; }
 		public DbSet<DeviceDto> DeviceDtos { get; set; }
 		public DbSet<DeviceAttributes> DeviceAttributes { get; set; }
+		public DbSet<Favorite> Favorite { get; set; }
 
 		//string connectionString = "Data Source=GALIPABAY;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 		string connectionString = "Data Source=DESKTOP-Q0BKLV1;Initial Catalog=MyDrone_DB;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";

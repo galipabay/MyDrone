@@ -1,0 +1,26 @@
+﻿@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+<div id="map" style="height: 400px;"></div>
+
+@code {
+    private IJSRuntime _jsRuntime;
+
+    public LeafletMap(IJSRuntime jsRuntime)
+    {
+        _jsRuntime = jsRuntime;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _jsRuntime.InvokeVoidAsync("initializeMap");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Cleanup if needed
+    }
+}

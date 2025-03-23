@@ -1,12 +1,16 @@
-﻿namespace MyDrone.Web.App.Models
+﻿using MyDrone.Kernel.Models;
+
+namespace MyDrone.Web.App.Models
 {
     public class DeviceViewModel
     {
-        public int Id { get; set; }  // Cihazın ID'si
-        public string Name { get; set; }  // Cihazın adı
-        public string Category { get; set; }  // Cihazın kategorisi
-        public decimal Price { get; set; }  // Cihazın fiyatı
-        public int Stock { get; set; }  // Cihazın stok miktarı
+        private Device device;
+
+        public Device Device
+        {
+            get { return device; }
+            set { device = value; }
+        }
     }
 
 }
