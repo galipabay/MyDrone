@@ -1,6 +1,15 @@
 ﻿@model List<MyDrone.Kernel.Models.Device>
 
 
+@if (TempData["DeleteMessage"] != null)
+{
+    <div id="deleteAlert" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["DeleteMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
 <div class="container mt-4">
     <h2 class="mb-4">Ürünlerim</h2>
 
@@ -33,6 +42,23 @@
         <p>Henüz eklenmiş bir ürün bulunmamaktadır.</p>
     }
 </div>
+
+@section Scripts {
+    <script>
+        setTimeout(function () {
+            const alertBox = document.getElementById('deleteAlert');
+            if (alertBox) {
+                // Yavaşça kaybolmasını sağla
+                alertBox.classList.remove('show');
+                alertBox.classList.add('fade');
+                // Elementi tamamen DOM'dan kaldır (isteğe bağlı)
+                setTimeout(() => alertBox.remove(), 500); // 0.5 saniye sonra temizle
+            }
+        }, 3000); // 3 saniye sonra uyarıyı kaybet
+    </script>
+}
+
+
 
 <style>
     .device-list {

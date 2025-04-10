@@ -48,5 +48,22 @@ namespace MyDrone.Kernel.Models
 			get { return deletedDate; }
 			set { deletedDate = value; }
 		}
+
+		private string? deletedBy;
+
+		public string? DeletedBy
+		{
+			get { return deletedBy; }
+			set { deletedBy = value; }
+		}
+
+		private string? deleteReason;
+
+		public string? DeleteReason
+		{
+			get { return deleteReason; }
+			set { deleteReason = value; }
+		}
+
 	}
 }

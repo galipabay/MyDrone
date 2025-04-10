@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using MyDrone.Business.Services;
 using MyDrone.Web.App.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -33,13 +34,14 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="mapper"></param>
         /// <param name="context"></param>
         /// <param name="emailService"></param>
-        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context, IEmailService emailService)
+        public UserController(IService<UserDto> service, IMapper mapper, AppDbContext context, IEmailService emailService, IService<Device> sellerDeviceService, IDeviceService deviceService)
         {
             _service = service;
             _mapper = mapper;
             _context = context;
             _emailService = emailService;
-
+            _sellerDeviceService = sellerDeviceService;
+            _deviceService = deviceService;
         }
         #region Index
         public async Task<IActionResult> Index()
@@ -60,6 +62,7 @@ namespace MyDrone.Web.App.Controllers
             return View(viewModel);
         }
         #endregion
+
         #region Login
 
         // GET: User/Login
@@ -69,10 +72,9 @@ namespace MyDrone.Web.App.Controllers
             ViewBag.HideLayoutSections = true;
             return View();
         }
-
         // POST: User/Login
         [HttpPost]
-        public async Task<IActionResult> Login(string Identifier, string Password)
+        public async Task<IActionResult> Login(string Identifier, string Password, string returnUrl = null)
         {
             // Eğer kullanıcı adı veya şifre boşsa hata döndür
             if (string.IsNullOrWhiteSpace(Identifier) || string.IsNullOrWhiteSpace(Password))
@@ -85,18 +87,16 @@ namespace MyDrone.Web.App.Controllers
             var user = await _context.User.FirstOrDefaultAsync(u =>
                 (u.MailAddress == Identifier || u.TelNo == Identifier) && u.Password == Password);
 
-
             if (user != null)
             {
                 // Kullanıcı bulundu, claim'leri oluştur 
                 var claims = new List<Claim>
-                {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
-                new Claim(ClaimTypes.Email, user.MailAddress), // E-posta adresi
-                new Claim(ClaimTypes.Name, user.Name), // Kullanıcı adı (varsa)
-                new Claim(ClaimTypes.Surname, user.Surname),// Kullanıcı soyadı (varsa)
-                // Diğer claim'leri buraya ekleyebilirsiniz
-                };
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID'si
+            new Claim(ClaimTypes.Email, user.MailAddress), // E-posta adresi
+            new Claim(ClaimTypes.Name, user.Name), // Kullanıcı adı
+            new Claim(ClaimTypes.Surname, user.Surname) // Kullanıcı soyadı
+        };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -104,7 +104,13 @@ namespace MyDrone.Web.App.Controllers
                 // Kullanıcıyı oturum açtır
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-                // Başarılı giriş için yönlendirme
+                // Eğer returnUrl doluysa ve güvenli bir URL ise oraya yönlendir
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                // Eğer returnUrl yoksa ana sayfaya git
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -113,6 +119,7 @@ namespace MyDrone.Web.App.Controllers
                 return View();
             }
         }
+
 
         #endregion
 
@@ -391,13 +398,55 @@ namespace MyDrone.Web.App.Controllers
             return View(model);
         }
 
-        #endregion
+        #endregion     
 
-        
+        #region SendEmail
+        /// <summary>
+        /// E-posta gönderme işlemi yapar
+        /// </summary>
+        /// <returns></returns>
         public IActionResult SendEmail()
         {
             _emailService.SendEmail("example@example.com", "Test Subject", "Test Body");
             return View();
         }
+        #endregion
+
+        #region ViewDevice
+        /// <summary>
+        /// Cihaz detayına yönlendirme yapar ve cihazı daha önce görüntülenenler listesine ekler
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ViewDevice(int deviceId)
+        {
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var recentlyViewed = await _context.RecentlyViewed
+                .FirstOrDefaultAsync(rv => rv.UserId == userId && rv.DeviceId == deviceId);
+
+            if (recentlyViewed == null)
+            {
+                // Cihaz daha önce görüntülenmemişse yeni kayıt ekliyoruz
+                _context.RecentlyViewed.Add(new RecentlyViewed
+                {
+                    UserId = userId,
+                    DeviceId = deviceId,
+                    ViewedAt = DateTime.Now
+                });
+            }
+            else
+            {
+                // Cihaz daha önce görüntülenmişse sadece tarihini güncelliyoruz
+                recentlyViewed.ViewedAt = DateTime.Now;
+                _context.RecentlyViewed.Update(recentlyViewed);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Cihaz detayına yönlendirme
+            return RedirectToAction("Details", new { id = deviceId });
+        }
+        #endregion
     }
 }

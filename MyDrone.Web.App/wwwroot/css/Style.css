@@ -113,3 +113,30 @@ nav {
     width: 100%;
     box-sizing: border-box; /* Tüm kenar boşluklarını ve kenarlıkları hesapla */
 }
+
+/* Kalp Animasyonu */
+@keyframes heartAnimation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2); /* Kalp simgesini büyütme */
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animated-heart {
+    animation: heartAnimation 0.3s ease-out;
+}
+
+/* Kalp ikonunun animasyonu başlangıç durumuna göre */
+.favorite-button .heart-icon {
+    transition: transform 0.3s ease-out, color 0.3s ease-out;
+}

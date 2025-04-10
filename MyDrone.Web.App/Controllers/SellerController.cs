@@ -60,6 +60,7 @@ namespace MyDrone.Web.App.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [HttpGet]
         public async Task<IActionResult> DeviceDetail(int id)
         {
             var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)); // Kullanıcı ID'sini alıyoruz
@@ -86,17 +87,18 @@ namespace MyDrone.Web.App.Controllers
         }
 
         /// <summary>
-        /// Favoriye ekleme/çıkarma işlemi
+        ///  
         /// </summary>
         /// <param name="deviceId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> ToggleFavorite(int deviceId, int userId)
+        public async Task<IActionResult> ToggleFavorite(int deviceId)
         {
             var device = await _context.Device.FindAsync(deviceId);
+            
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var user = await _context.User.FindAsync(userId);
-
 
             if (device == null || user == null)
             {
@@ -134,7 +136,7 @@ namespace MyDrone.Web.App.Controllers
             var isFavorited = await _context.Favorite
                 .AnyAsync(f => f.UserId == userId && f.DeviceId == deviceId);
 
-            return Json(new { success = true, isFavorited = isFavorited });
+            return RedirectToAction("DeviceDetail", new { id = deviceId });
 
         }
         #endregion
@@ -241,7 +243,6 @@ namespace MyDrone.Web.App.Controllers
 
                 return RedirectToAction("Devices"); // Liste sayfasına yönlendir
             }
-
             return View(device); // Model hatalıysa sayfayı tekrar göster
         }
 
@@ -253,14 +254,15 @@ namespace MyDrone.Web.App.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<IActionResult> EditDevice(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditDevice(int deviceNo)
         {
-            var device = await _context.Device.FindAsync(id); // Ürünü getir
+            var device = _context.Device.FirstOrDefault(d => d.DeviceNo == deviceNo);
             if (device == null)
             {
-                return NotFound(); // Ürün bulunamazsa hata sayfası
+                return NotFound();
             }
-            return View(device);
+            return View("DeviceEdit",device);
         }
 
         /// <summary>
@@ -269,51 +271,43 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="device"></param>
         /// <returns></returns>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditDevice(Device device)
         {
             if (ModelState.IsValid)
             {
-                _context.Device.Update(device); // Ürünü güncelle
-                await _context.SaveChangesAsync(); // Değişiklikleri kaydet
-                return RedirectToAction("Devices"); // Liste sayfasına yönlendir
+                _context.Device.Update(device);
+                await _context.SaveChangesAsync(); 
+                return RedirectToAction("Devices"); 
             }
-            return View(device); // Hata olursa aynı sayfayı göster
+            return View(device);
         }
 
         #endregion
 
         #region DeleteDevice
-        /// <summary>
-        /// Ürün silme sayfası
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<IActionResult> DeleteDevice(int id)
-        {
-            var device = await _context.Device.FindAsync(id); // Ürünü getir
-            if (device == null)
-            {
-                return NotFound(); // Ürün bulunamazsa hata sayfası
-            }
-            return View(device);
-        }
 
         /// <summary>
         /// Ürün silme işlemi
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, ActionName("DeleteDevice")]
-        public async Task<IActionResult> DeleteDeviceConfirmed(int id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteDeviceConfirmed(int id,string deleteReason)
         {
             var device = await _context.Device.FindAsync(id); // Ürünü getir
-            if (device != null)
-            {
-                _context.Device.Remove(device); // Ürünü sil
-                await _context.SaveChangesAsync(); // Değişiklikleri kaydet
-            }
+            if (device == null) return NotFound();
+
+            device.IsDeleted = true;
+            device.DeletedDate = DateTime.Now;
+            device.DeletedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            device.DeleteReason = deleteReason;
+
+            _context.SaveChanges();
+            TempData["DeleteMessage"] = "Ürün başarıyla silindi.";
             return RedirectToAction("Devices"); // Liste sayfasına yönlendir
         }
+
         #endregion
     }
 }

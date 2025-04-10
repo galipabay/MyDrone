@@ -1,0 +1,162 @@
+﻿@using Microsoft.IdentityModel.Tokens
+@model MyDrone.Kernel.Models.Device
+
+@{
+    ViewData["Title"] = "Cihaz Düzenle";
+}
+
+<h2 class="text-center">@ViewData["Title"]</h2>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow p-4">
+                <form method="post" asp-action="Edit" enctype="multipart/form-data">
+                    <div class="row">
+
+                        <!-- Marka -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Brand">Marka</label>
+                            <select asp-for="Brand" class="form-control" asp-items="ViewBag.Brands">
+                                <option value="">Marka Seçin</option>
+                            </select>
+                        </div>
+
+                        <!-- Model -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Model">Model</label>
+                            <select asp-for="Model" class="form-control" asp-items="ViewBag.Models">
+                                <option value="">Önce Marka Seçin</option>
+                            </select>
+                        </div>
+
+                        <!-- Yakıt Türü -->
+                        <div class="col-md-6 form-group">
+                            <label>Yakıt Türü</label>
+                            <select asp-for="FuelType" class="form-control">
+                                <option value="1" selected="@(Model.FuelType == 1)">Hybrid</option>
+                                <option value="2" selected="@(Model.FuelType == 2)">Elektrik</option>
+                                <option value="3" selected="@(Model.FuelType == 3)">Benzin</option>
+                            </select>
+                        </div>
+
+                        <!-- Hız -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Speed">Hız (km/h)</label>
+                            <input asp-for="Speed" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Menzil -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Range">Menzil (km)</label>
+                            <input asp-for="Range" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Uçuş Süresi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="AirTime">Uçuş Süresi (dk)</label>
+                            <input asp-for="AirTime" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Kamera Kalitesi -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="CamQuality">Kamera Kalitesi (MP)</label>
+                            <input asp-for="CamQuality" class="form-control" />
+                        </div>
+
+                        <!-- Gece Görüşü -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="NightVision">Gece Görüşü</label>
+                            <input asp-for="NightVision" class="form-control" type="checkbox" />
+                        </div>
+
+                        <!-- İrtifa -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Altitude">Maksimum İrtifa (m)</label>
+                            <input asp-for="Altitude" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Renk -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Color">Renk</label>
+                            <input asp-for="Color" class="form-control" type="color" />
+                        </div>
+
+                        <!-- Fiyat -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Price">Fiyat (₺)</label>
+                            <input asp-for="Price" class="form-control" type="number" />
+                        </div>
+
+                        <!-- Açıklama -->
+                        <div class="col-md-12 form-group">
+                            <label asp-for="Description">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <!-- Konum Bilgileri -->
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Country">Ülke</label>
+                            <input asp-for="Country" class="form-control" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label asp-for="City">Şehir</label>
+                            <input asp-for="City" class="form-control" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label asp-for="Province">İlçe</label>
+                            <input asp-for="Province" class="form-control" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label asp-for="District">Mahalle</label>
+                            <input asp-for="District" class="form-control" />
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label asp-for="Street">Sokak</label>
+                            <input asp-for="Street" class="form-control" />
+                        </div>
+
+                        <!-- Video URL -->
+                        <div class="col-md-6 form-group">
+                            <label>Video URL</label>
+                            <input type="url" asp-for="Video" class="form-control" />
+                        </div>
+
+                        <!-- Resim Yükleme -->
+                        <div class="col-md-6 form-group">
+                            <label>Resim Yükle</label>
+                            <input type="file" asp-for="Image" class="form-control" />
+                        </div>
+
+                        <!-- Mevcut Resim Önizleme -->
+                        @if (Model.Image != null && Model.Image.Length > 0)
+                        {
+                            <div class="col-md-12 text-center mt-3">
+                                <label>Mevcut Resim</label><br />
+                                <img src="@Model.Image" alt="Cihaz Resmi" class="img-thumbnail" width="200" />
+                            </div>
+                        }
+
+                        <!-- Durum -->
+                        <div class="col-md-12 form-group">
+                            <label>Cihaz Durumu</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="Status" value="true" id="kiralik" checked="@(Model.Status)" />
+                                <label class="form-check-label" for="kiralik">Kiralık</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="Status" value="false" id="satilik" checked="@(Model.Status == false)" />
+                                <label class="form-check-label" for="satilik">Satılık</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Düzenlemeyi Kaydet</button>
+                </form>
+
+                <a href="/devices" class="btn btn-secondary btn-block mt-2">Geri Dön</a>
+            </div>
+        </div>
+    </div>
+</div>

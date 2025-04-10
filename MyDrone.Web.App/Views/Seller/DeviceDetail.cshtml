@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Device Details";
 }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="container">
     <div class="details-container">
@@ -12,17 +13,32 @@
         <!-- Sadece seller kullanıcıları için butonlar -->
         @if (Model.IsSeller)
         {
-            <a href="@Url.Action("EditDevice", "Seller")" class="btn btn-secondary">Düzenle</a>
-            <a href="@Url.Action("DeleteDevice", "Seller")" class="btn btn-secondary">Sil</a>
+            <a href="@Url.Action("EditDevice", "Seller", new { deviceNo = @Model.Device.DeviceNo })" class="btn btn-secondary">Düzenle</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                Sil
+            </button>
+
+            @await Html.PartialAsync("_DeleteConfirmationModal", @Model.Device.Id)
+
         }
 
-        <!-- Favori butonu, eğer kullanıcı seller ise görünmesin -->
-        @if (!Model.IsSeller)
+        @if (!User.Identity.IsAuthenticated)
         {
-            <button id="favoriteButton" class="btn btn-outline-danger">
-                <i class="fa @(Model.IsFavorited ? "fa-heart" : "fa-heart-o")" aria-hidden="true"></i> Favoriye Ekle
-            </button>
+            <!-- Kullanıcı giriş yapmamışsa -->
+            <a href="@Url.Action("Login", "User", new { returnUrl = Context.Request.Path })" class="btn btn-primary">
+                Favorilere eklemek için giriş yap
+            </a>
+
         }
+        else if (!Model.IsSeller)
+        {
+            <!-- Kullanıcı giriş yapmış ama seller değilse -->
+            <form method="post" action="@Url.Action("ToggleFavorite", "Seller")">
+                <input type="hidden" name="deviceId" value="@Model.Device.Id" />
+                <button type="submit">Favorilere Ekle / Çıkar</button>
+            </form>
+        }
+
 
         <table class="table">
             <tbody>
@@ -79,32 +95,6 @@
     <a href="@Url.Action("Devices", "Seller")" class="btn btn-secondary">Ürünlerime Geri Dön</a>
 </div>
 
-<!-- AJAX ve JavaScript -->
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $("#favoriteButton").click(function () {
-                var deviceId = @Model.Device.Id;  // Cihazın ID'si
-                var userId = @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                $.ajax({
-                    url: '@Url.Action("ToggleFavorite", "Device")',
-                    type: 'POST',
-                    data: {
-                        deviceId: deviceId,
-                        userId: userId
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            // Favori durumu başarılı şekilde güncellendi
-                            var iconClass = response.isFavorited ? 'fa-heart' : 'fa-heart-o';
-                            $("#favoriteButton i").removeClass("fa-heart fa-heart-o").addClass(iconClass);
-                        } else {
-                            alert("Bir hata oluştu, lütfen tekrar deneyin.");
-                        }
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 }

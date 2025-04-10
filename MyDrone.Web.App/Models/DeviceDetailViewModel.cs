@@ -28,5 +28,14 @@ namespace MyDrone.Web.App.Models
             set { isSeller = value; }
         }
 
+        private bool isRecentlyViewed;
+
+        public bool IsRecentlyViewed
+        {
+            get { return isRecentlyViewed; }
+            set { isRecentlyViewed = value; }
+        }
+
+
     }
 }

@@ -39,73 +39,141 @@
             transition: transform 0.3s;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
+
+        /* Favori Butonu Animasyonu */
+        .heart-button {
+            position: relative;
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+            .heart-button .heart-icon {
+                color: #ff3b30;
+                font-size: 30px;
+                transition: transform 0.3s ease;
+            }
+
+            .heart-button.liked .heart-icon {
+                transform: scale(1.2);
+                color: #f00;
+            }
+
+            .heart-button .heart-icon:before {
+                content: "\f004";
+                font-family: 'FontAwesome';
+            }
+
+            .heart-button .heart-icon:after {
+                content: "\f08a";
+                font-family: 'FontAwesome';
+                display: none;
+            }
+
+            .heart-button.liked .heart-icon:after {
+                display: inline;
+            }
     </style>
 </head>
 <body>
     <div class="container mt-4">
         <!-- Son Görüntülenen İlanlar -->
         <h2 class="section-title">Son Görüntülenen İlanlar</h2>
-        <div id="recentlyViewedCarousel" class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner">
-                @foreach (var item in Model)
-                {
-                    <div class="carousel-item @if (item.IsFavorited) { <text>active</text> }">
-                        <img src="@item.Device.Image" class="d-block w-100" alt="İlan">
-                    </div>
-                }
+
+        @if (Model != null && Model.Any())
+        {
+            <div id="recentlyViewedCarousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    @foreach (var item in Model)
+                    {
+                        <div class="carousel-item @(item.IsFavorited ? "active" : "")">
+                            <img src="@(item.Device?.Image != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.Device.Image)}" : "/images/default-image.jpg")"
+                                 class="d-block w-100" alt="İlan">
+                        </div>
+                    }
+                </div>
+                <a class="carousel-control-prev" href="#recentlyViewedCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Önceki</span>
+                </a>
+                <a class="carousel-control-next" href="#recentlyViewedCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Sonraki</span>
+                </a>
             </div>
-            <a class="carousel-control-prev" href="#recentlyViewedCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Önceki</span>
-            </a>
-            <a class="carousel-control-next" href="#recentlyViewedCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Sonraki</span>
-            </a>
-        </div>
+        }
+        else
+        {
+            <p>Gösterilecek ilan bulunamadı.</p>
+        }
 
         <!-- Haftanın Popüler İlanları -->
         <h2 class="section-title">Haftanın Popüler İlanları</h2>
-        <div id="popularCarousel" class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner">
-                @foreach (var item in Model)
-                {
-                    <div class="carousel-item @if (item.IsFavorited) { <text>active</text> }">
-                        <img src="@item.Device.Image" class="d-block w-100" alt="Popüler">
-                    </div>
-                }
+
+        @if (Model != null && Model.Any())
+        {
+            <div id="popularCarousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    @foreach (var item in Model)
+                    {
+                        <div class="carousel-item @(item.IsFavorited ? "active" : "")">
+                            <img src="@(item.Device?.Image != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.Device.Image)}" : "/images/default-image.jpg")"
+                                 class="d-block w-100" alt="İlan">
+                        </div>
+                    }
+                </div>
+                <a class="carousel-control-prev" href="#popularCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Önceki</span>
+                </a>
+                <a class="carousel-control-next" href="#popularCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Sonraki</span>
+                </a>
             </div>
-            <a class="carousel-control-prev" href="#popularCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Önceki</span>
-            </a>
-            <a class="carousel-control-next" href="#popularCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Sonraki</span>
-            </a>
-        </div>
+        }
+        else
+        {
+            <p>Popüler ilan bulunamadı.</p>
+        }
 
         <!-- Genel İlanlar -->
         <h2 class="section-title">Tüm İlanlar</h2>
-        <div class="infinite-scroll" id="generalListings">
-            @foreach (var item in Model)
-            {
-                <div class="card">
-                    <img src="@item.Device.Image" class="card-img-top" alt="İlan">
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Device.Brand @item.Device.Model</h5>
-                        <p class="card-text">@item.Device.Description</p>
-                        <p class="card-text">Fiyat: @item.Device.Price</p>
 
-                        <!-- Favori Butonu -->
-                        @if (!item.IsSeller)
-                        {
-                            <button class="btn btn-outline-danger" id="favoriteButton-@item.Device.Id" data-device-id="@item.Device.Id">
-                                <i class="fa @(item.IsFavorited ? "fa-heart" : "fa-heart-o")" aria-hidden="true"></i> Favoriye Ekle
-                            </button>
-                        }
-                    </div>
-                </div>
+        <div class="infinite-scroll" id="generalListings">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <a href="@Url.Action("DeviceDetail", "Seller", new { id = item.Device.Id })" class="card-link">
+                        <div class="card">
+                            <img src="@(item.Device?.Image != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(item.Device.Image)}" : "/images/default-image.jpg")"
+                                 class="d-block w-100" alt="İlan">
+
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Device?.Brand @item.Device?.Model</h5>
+                                <p class="card-text">@item.Device?.Description</p>
+                                <p class="card-text">Fiyat: @(item.Device?.Price ?? 0) TL</p>
+
+                                <!-- Favori Butonu -->
+                                @if (!item.IsSeller)
+                                {
+                                    <button class="favorite-button btn btn-outline-danger" data-device-id="@item.Device.Id">
+                                        <i class="fa @(item.IsFavorited ? "fa-heart" : "fa-heart-o") heart-icon" aria-hidden="true"></i>
+                                        <span>@(item.IsFavorited ? "Favoriden Çıkar" : "Favoriye Ekle")</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <p>Şu anda ilan bulunmamaktadır.</p>
             }
         </div>
     </div>
@@ -113,31 +181,40 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Infinite Scroll için basit bir örnek
-        let page = 1;
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-                loadMoreListings();
-            }
-        });
 
-        function loadMoreListings() {
-            page++;
-            const generalListings = document.getElementById('generalListings');
-            for (let i = 0; i < 4; i++) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="İlan">
-                    <div class="card-body">
-                        <h5 class="card-title">Yeni Drone Model ${page}-${i}</h5>
-                        <p class="card-text">Fiyat: ${4000 + i * 500} TL</p>
-                    </div>
-                `;
-                generalListings.appendChild(card);
-            }
-        }
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- SLIM versiyonu kaldır, AJAX için tam sürüm ekle -->
+
+    <script>
+        $(document).ready(function () {
+            $(".favorite-button").on("click", function () {
+                var button = $(this);
+                var icon = button.find(".heart-icon");
+                var deviceId = button.data("device-id");
+
+                // AJAX ile favori ekleme/çıkarma isteği gönder
+                $.ajax({
+                    url: '@Url.Action("ToggleFavorite", "Seller")',
+                    type: 'POST',
+                    data: { deviceId: deviceId },
+                    success: function (response) {
+                        if (response.success) {
+                            // Favori durumuna göre güncelle
+                            if (response.isFavorited) {
+                                icon.removeClass("fa-heart-o").addClass("fa-heart");
+                                button.find("span").text("Favoriden Çıkar");
+                            } else {
+                                icon.removeClass("fa-heart").addClass("fa-heart-o");
+                                button.find("span").text("Favoriye Ekle");
+                            }
+                        } else {
+                            alert("İşlem başarısız, tekrar deneyin.");
+                        }
+                    }
+                });
+            });
+        });
     </script>
+
+
 </body>
 </html>
