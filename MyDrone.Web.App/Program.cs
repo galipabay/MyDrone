@@ -1,5 +1,6 @@
-using Autofac.Extensions.DependencyInjection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MyDrone.Business.Mapping;
 using MyDrone.Business.Services;
@@ -9,9 +10,8 @@ using MyDrone.Kernel.UnitOfWork;
 using MyDrone.Types;
 using MyDrone.Types.Repositories;
 using MyDrone.Types.UnitOfWork;
-using System.Reflection;
 using MyDrone.Web.App.Modules;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Reflection;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,14 +29,14 @@ builder.Services.AddAutoMapper(typeof(MapProfile));
 
 builder.Services.AddDbContext<AppDbContext>(x =>
 {
-	x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"), option =>
-	{
-		option.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
-	});
+    x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"), option =>
+    {
+        option.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
+    });
 });
 
 builder.Services.AddRazorPages()
-	.AddRazorRuntimeCompilation();
+    .AddRazorRuntimeCompilation();
 
 //builder.Services.AddScoped(typeof(NotFoundFilter<>));
 
@@ -44,21 +44,21 @@ builder.Services.AddRazorPages()
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-	options.IdleTimeout = TimeSpan.FromMinutes(30);
-	options.Cookie.HttpOnly = true;
-	options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new RepoServiceModule()));
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-	.AddCookie(options =>
-	{
-		options.LoginPath = "/User/Login"; // Giriþ yolu
-		options.LogoutPath = "/User/Logout"; // Çýkýþ yolu
-		options.AccessDeniedPath = "/User/AccessDenied"; // Eriþim engelli yolu
-	});
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/User/Login"; // Giriþ yolu
+        options.LogoutPath = "/User/Logout"; // Çýkýþ yolu
+        options.AccessDeniedPath = "/User/AccessDenied"; // Eriþim engelli yolu
+    });
 
 builder.Services.AddControllersWithViews();
 
@@ -66,10 +66,8 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 {
-	containerBuilder.RegisterModule(new RepoServiceModule()); // RepoServiceModule'u burada kaydediyoruz
+    containerBuilder.RegisterModule(new RepoServiceModule()); // RepoServiceModule'u burada kaydediyoruz
 });
-
-
 
 
 var app = builder.Build();
@@ -78,9 +76,9 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-	app.UseExceptionHandler("/Home/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 // Middleware'leri ayarlama
@@ -94,7 +92,7 @@ app.UseRouting();
 app.UseSession();
 
 app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

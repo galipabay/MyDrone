@@ -2,16 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using MyDrone.Business.Services;
 using MyDrone.Kernel.Models;
 using MyDrone.Kernel.Services;
 using MyDrone.Types;
 using MyDrone.Web.App.Models;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Security.Claims;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -23,7 +18,7 @@ namespace MyDrone.Web.App.Controllers
         private readonly IEmailService _emailService;
         private readonly IDeviceService _deviceService;
 
-        public SellerController(IService<Device> sellerDeviceService, IMapper mapper, AppDbContext context, IEmailService emailService,IDeviceService deviceService)
+        public SellerController(IService<Device> sellerDeviceService, IMapper mapper, AppDbContext context, IEmailService emailService, IDeviceService deviceService)
         {
             _sellerDeviceService = sellerDeviceService;
             _mapper = mapper;
@@ -42,13 +37,13 @@ namespace MyDrone.Web.App.Controllers
         {
             int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)); // ASP.NET Core'da kullanıcı ID'si almak için
 
-            var user = _context.User.Find(userId); // Kullanıcı bilgilerini çekiyoruz
+            var user = _context.Users.Find(userId); // Kullanıcı bilgilerini çekiyoruz
 
             if (user == null || !user.IsSeller) // Eğer kullanıcı bulunamazsa veya seller değilse
             {
                 return RedirectToAction("AccessDenied", "Error");
             }
-            var devices = await _context.Device.Where(d => d.UserId == userId).ToListAsync();
+            var devices = await _context.Devices.Where(d => d.UserId == userId).ToListAsync();
             return View(devices);
         }
 
@@ -64,7 +59,7 @@ namespace MyDrone.Web.App.Controllers
         public async Task<IActionResult> DeviceDetail(int id)
         {
             var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)); // Kullanıcı ID'sini alıyoruz
-            var device = await _context.Device.FirstOrDefaultAsync(d => d.Id == id); // Cihazı veritabanından alıyoruz
+            var device = await _context.Devices.FirstOrDefaultAsync(d => d.Id == id); // Cihazı veritabanından alıyoruz
 
 
             if (device == null)
@@ -73,7 +68,7 @@ namespace MyDrone.Web.App.Controllers
             }
 
             // Favori kontrolü için asenkron işlem
-            var isFavorited = await _context.Favorite
+            var isFavorited = await _context.Favorites
                 .AnyAsync(f => f.UserId == userId && f.DeviceId == id);
 
             bool isSeller = device.UserId == userId; // Cihazın sahibi mi?  
@@ -95,10 +90,10 @@ namespace MyDrone.Web.App.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleFavorite(int deviceId)
         {
-            var device = await _context.Device.FindAsync(deviceId);
-            
+            var device = await _context.Devices.FindAsync(deviceId);
+
             var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var user = await _context.User.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
 
             if (device == null || user == null)
             {
@@ -113,18 +108,18 @@ namespace MyDrone.Web.App.Controllers
                 return Json(new { success = false, message = "Kendi ürününüzü favoriye ekleyemezsiniz." });
             }
 
-            var favorite = await _context.Favorite
+            var favorite = await _context.Favorites
                 .FirstOrDefaultAsync(f => f.UserId == userId && f.DeviceId == deviceId);
 
             if (favorite != null)
             {
                 // Eğer zaten favoriyse, favoriden çıkar
-                _context.Favorite.Remove(favorite);
+                _context.Favorites.Remove(favorite);
             }
             else
             {
                 // Eğer favoriye eklenmemişse, favoriye ekle
-                _context.Favorite.Add(new Favorite
+                _context.Favorites.Add(new Favorite
                 {
                     UserId = userId,
                     DeviceId = deviceId
@@ -133,7 +128,7 @@ namespace MyDrone.Web.App.Controllers
             await _context.SaveChangesAsync();
 
             // Yeni favori durumu kontrol et
-            var isFavorited = await _context.Favorite
+            var isFavorited = await _context.Favorites
                 .AnyAsync(f => f.UserId == userId && f.DeviceId == deviceId);
 
             return RedirectToAction("DeviceDetail", new { id = deviceId });
@@ -194,7 +189,7 @@ namespace MyDrone.Web.App.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeviceAdd(Device device,IFormFile imageFile)
+        public async Task<IActionResult> DeviceAdd(Device device, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
@@ -238,7 +233,7 @@ namespace MyDrone.Web.App.Controllers
                 device.DeviceNo = await _deviceService.GenerateNextDeviceNumberAsync();
 
                 // Veritabanına ekle
-                _context.Device.Add(device);
+                _context.Devices.Add(device);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("Devices"); // Liste sayfasına yönlendir
@@ -257,12 +252,12 @@ namespace MyDrone.Web.App.Controllers
         [HttpGet]
         public async Task<IActionResult> EditDevice(int deviceNo)
         {
-            var device = _context.Device.FirstOrDefault(d => d.DeviceNo == deviceNo);
+            var device = _context.Devices.FirstOrDefault(d => d.DeviceNo == deviceNo);
             if (device == null)
             {
                 return NotFound();
             }
-            return View("DeviceEdit",device);
+            return View("DeviceEdit", device);
         }
 
         /// <summary>
@@ -276,9 +271,9 @@ namespace MyDrone.Web.App.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Device.Update(device);
-                await _context.SaveChangesAsync(); 
-                return RedirectToAction("Devices"); 
+                _context.Devices.Update(device);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Devices");
             }
             return View(device);
         }
@@ -293,9 +288,9 @@ namespace MyDrone.Web.App.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> DeleteDeviceConfirmed(int id,string deleteReason)
+        public async Task<IActionResult> DeleteDeviceConfirmed(int id, string deleteReason)
         {
-            var device = await _context.Device.FindAsync(id); // Ürünü getir
+            var device = await _context.Devices.FindAsync(id); // Ürünü getir
             if (device == null) return NotFound();
 
             device.IsDeleted = true;

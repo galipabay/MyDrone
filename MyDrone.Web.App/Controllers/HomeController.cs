@@ -10,24 +10,28 @@ using System.Security.Claims;
 
 namespace MyDrone.Web.App.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IService<Device> _deviceService;
-        private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly INotificationService _notificationService;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IService<Device> deviceService, AppDbContext context)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IService<Device> deviceService, AppDbContext context, IEmailService emailService, INotificationService notificationService)
+    : base(unitOfWork, notificationService, context) // <-- Bunu eklemen gerek!
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _deviceService = deviceService;
-            _context = context;
+            _emailService = emailService;
+            _notificationService = notificationService;
         }
+
 
         public async Task<IActionResult> Index()
         {
-            var devices = await _context.Device.ToListAsync();
+            var devices = await _context.Devices.ToListAsync();
 
             // Kullanıcı giriş yaptıysa favori kontrolü yap, giriş yapmadıysa boş liste ata
             List<int> favoriteDeviceIds = new List<int>();
@@ -38,7 +42,7 @@ namespace MyDrone.Web.App.Controllers
                 var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
                 // Favori ilanları çek
-                favoriteDeviceIds = await _context.Favorite
+                favoriteDeviceIds = await _context.Favorites
                     .Where(f => f.UserId == userId)
                     .Select(f => f.DeviceId)
                     .ToListAsync();
@@ -50,6 +54,13 @@ namespace MyDrone.Web.App.Controllers
                     .Take(5)
                     .Select(r => r.DeviceId)
                     .ToListAsync();
+
+
+                // Örnek bildirim oluşturma (test amaçlı)
+                await _notificationService.CreateAsync("Hoş geldiniz! Sistemimize giriş yaptınız",
+                    type: NotificationType.Info);
+
+                ViewBag.UnreadCount = await _notificationService.GetUnreadCountAsync(userId);
             }
 
             // ViewModel oluştur

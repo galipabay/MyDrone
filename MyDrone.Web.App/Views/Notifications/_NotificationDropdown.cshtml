@@ -1,0 +1,27 @@
+﻿<!-- Views/Notifications/_NotificationDropdown.cshtml -->
+@model List<Notification>
+
+<div class="notification-dropdown">
+    @foreach (var notification in Model)
+    {
+        <a href="@notification.RelatedUrl" class="notification-item @(!notification.IsRead ? "unread" : "")"
+           data-notification-id="@notification.Id">
+            <div class="notification-message">@notification.Message</div>
+            <div class="notification-time">@notification.CreatedDate.ToString("HH:mm")</div>
+        </a>
+    }
+    <div class="notification-footer">
+        <a href="/Notifications">Tümünü Gör</a>
+    </div>
+</div>
+
+<style>
+    .notification-dropdown {
+        /* Stilleriniz */
+    }
+
+    .unread {
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+</style>

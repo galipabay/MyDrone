@@ -6,93 +6,118 @@
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<div class="container">
-    <div class="details-container">
-        <h2>@Model.Device.Brand @Model.Device.Model</h2>
+<div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-md space-y-6 mt-10">
 
-        <!-- Sadece seller kullanıcıları için butonlar -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-3xl font-bold text-gray-800">@Model.Device.Brand @Model.Device.Model</h2>
+
         @if (Model.IsSeller)
         {
-            <a href="@Url.Action("EditDevice", "Seller", new { deviceNo = @Model.Device.DeviceNo })" class="btn btn-secondary">Düzenle</a>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
-                Sil
-            </button>
+            <div class="space-x-2">
+                <a href="@Url.Action("EditDevice", "Seller", new { deviceNo = @Model.Device.DeviceNo })"
+                   class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition">
+                    Düzenle
+                </a>
 
-            @await Html.PartialAsync("_DeleteConfirmationModal", @Model.Device.Id)
+                <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+                        data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                    Sil
+                </button>
 
+                @await Html.PartialAsync("_DeleteConfirmationModal", @Model.Device.Id)
+            </div>
         }
-
-        @if (!User.Identity.IsAuthenticated)
-        {
-            <!-- Kullanıcı giriş yapmamışsa -->
-            <a href="@Url.Action("Login", "User", new { returnUrl = Context.Request.Path })" class="btn btn-primary">
-                Favorilere eklemek için giriş yap
-            </a>
-
-        }
-        else if (!Model.IsSeller)
-        {
-            <!-- Kullanıcı giriş yapmış ama seller değilse -->
-            <form method="post" action="@Url.Action("ToggleFavorite", "Seller")">
-                <input type="hidden" name="deviceId" value="@Model.Device.Id" />
-                <button type="submit">Favorilere Ekle / Çıkar</button>
-            </form>
-        }
-
-
-        <table class="table">
-            <tbody>
-                <tr><th>Device Number</th><td>@Model.Device.DeviceNo</td></tr>
-                <tr><th>Speed</th><td>@Model.Device.Speed km/h</td></tr>
-                <tr><th>Air Time</th><td>@Model.Device.AirTime min</td></tr>
-                <tr><th>Camera Quality</th><td>@Model.Device.CamQuality</td></tr>
-                <tr><th>Night Vision</th><td>@(Model.Device.NightVision ? "Yes" : "No")</td></tr>
-                <tr><th>Altitude</th><td>@Model.Device.Altitude m</td></tr>
-                <tr><th>Color</th><td>@Model.Device.Color</td></tr>
-                <tr><th>Range</th><td>@Model.Device.Range km</td></tr>
-                <tr><th>Fuel Type</th><td>@Model.Device.FuelType</td></tr>
-                <tr><th>Price</th><td>$@Model.Device.Price</td></tr>
-                <tr><th>Status</th><td>@(Model.Device.Status ? "Kiralık" : "Satılık")</td></tr>
-                <tr><th>Country</th><td>@Model.Device.Country</td></tr>
-                <tr><th>City</th><td>@Model.Device.City</td></tr>
-                <tr><th>Province</th><td>@Model.Device.Province</td></tr>
-                <tr><th>District</th><td>@Model.Device.District</td></tr>
-                <tr><th>Street</th><td>@Model.Device.Street</td></tr>
-                <tr><th>Description</th><td>@Model.Device.Description</td></tr>
-                <tr>
-                    <th>Image</th>
-                    <td>
-                        @if (@Model.Device.Image != null && @Model.Device.Image.Length > 0)
-                        {
-                            <img src="data:image/png;base64,@Convert.ToBase64String(@Model.Device.Image)" alt="Device Image" style="max-width:200px;" />
-                        }
-                        else
-                        {
-                            <span>No Image Available</span>
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <th>Video</th>
-                    <td>
-                        @if (!string.IsNullOrEmpty(@Model.Device.Video))
-                        {
-                            <video width="320" height="240" controls>
-                                <source src="@Model.Device.Video" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        }
-                        else
-                        {
-                            <span>No Video Available</span>
-                        }
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 
-    <a href="@Url.Action("Devices", "Seller")" class="btn btn-secondary">Ürünlerime Geri Dön</a>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-md">
+            <a href="@Url.Action("Login", "User", new { returnUrl = Context.Request.Path })"
+               class="font-semibold underline hover:text-blue-900">
+                Favorilere eklemek için giriş yap
+            </a>
+        </div>
+    }
+    else if (!Model.IsSeller)
+    {
+        <form method="post" action="@Url.Action("ToggleFavorite", "Seller")">
+            <input type="hidden" name="deviceId" value="@Model.Device.Id" />
+            <button type="submit"
+                    class="mt-4 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg transition">
+                <i class="fa fa-heart mr-1"></i> Favorilere Ekle / Çıkar
+            </button>
+        </form>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <table class="w-full text-sm text-gray-700">
+                <tbody class="divide-y divide-gray-200">
+                    <tr><td class="font-semibold">Device Number</td><td>@Model.Device.DeviceNo</td></tr>
+                    <tr><td class="font-semibold">Speed</td><td>@Model.Device.Speed km/h</td></tr>
+                    <tr><td class="font-semibold">Air Time</td><td>@Model.Device.AirTime min</td></tr>
+                    <tr><td class="font-semibold">Camera Quality</td><td>@Model.Device.CamQuality</td></tr>
+                    <tr><td class="font-semibold">Night Vision</td><td>@(Model.Device.NightVision ? "Yes" : "No")</td></tr>
+                    <tr><td class="font-semibold">Altitude</td><td>@Model.Device.Altitude m</td></tr>
+                    <tr><td class="font-semibold">Color</td><td>@Model.Device.Color</td></tr>
+                    <tr><td class="font-semibold">Range</td><td>@Model.Device.Range km</td></tr>
+                    <tr><td class="font-semibold">Fuel Type</td><td>@Model.Device.FuelType</td></tr>
+                    <tr><td class="font-semibold">Price</td><td>$@Model.Device.Price</td></tr>
+                    <tr><td class="font-semibold">Status</td><td>@(Model.Device.Status ? "Kiralık" : "Satılık")</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <table class="w-full text-sm text-gray-700">
+                <tbody class="divide-y divide-gray-200">
+                    <tr><td class="font-semibold">Country</td><td>@Model.Device.Country</td></tr>
+                    <tr><td class="font-semibold">City</td><td>@Model.Device.City</td></tr>
+                    <tr><td class="font-semibold">Province</td><td>@Model.Device.Province</td></tr>
+                    <tr><td class="font-semibold">District</td><td>@Model.Device.District</td></tr>
+                    <tr><td class="font-semibold">Street</td><td>@Model.Device.Street</td></tr>
+                    <tr><td class="font-semibold">Description</td><td>@Model.Device.Description</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        <div>
+            <h3 class="font-semibold mb-2">Görsel</h3>
+            @if (@Model.Device.Image != null && @Model.Device.Image.Length > 0)
+            {
+                <img src="data:image/png;base64,@Convert.ToBase64String(@Model.Device.Image)"
+                     alt="Device Image" class="w-full max-w-xs rounded-lg shadow" />
+            }
+            else
+            {
+                <p class="text-gray-500">No Image Available</p>
+            }
+        </div>
+
+        <div>
+            <h3 class="font-semibold mb-2">Video</h3>
+            @if (!string.IsNullOrEmpty(@Model.Device.Video))
+            {
+                <video class="w-full max-w-sm rounded-lg shadow" controls>
+                    <source src="@Model.Device.Video" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            }
+            else
+            {
+                <p class="text-gray-500">No Video Available</p>
+            }
+        </div>
+    </div>
+
+    <div class="pt-6">
+        <a href="@Url.Action("Devices", "Seller")"
+           class="inline-block bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+            ← Ürünlerime Geri Dön
+        </a>
+    </div>
 </div>
 
 @section Scripts {

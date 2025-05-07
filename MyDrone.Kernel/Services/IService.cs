@@ -19,6 +19,7 @@ namespace MyDrone.Kernel.Services
 		Task UpdateAsync(T entity);
 		Task RemoveAsync(T entity);
 		Task RemoveRangeAsync(IEnumerable<T> entities);
+		List<User> SearchUsers(string query);
 
 	}
 }

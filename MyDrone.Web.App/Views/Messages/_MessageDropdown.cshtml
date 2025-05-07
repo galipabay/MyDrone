@@ -1,0 +1,12 @@
+﻿@model MyDrone.Web.App.Models.MessageDto[]
+
+<ul class="dropdown-menu bg-white shadow-md rounded w-full max-h-80 overflow-auto">
+    @foreach (var message in Model)
+    {
+        <li class="p-2 border-b hover:bg-gray-100">
+            <strong>@message.Image @message.SenderName</strong><br />
+            <span class="text-sm text-gray-600">@message.Content</span><br />
+            <span class="text-xs text-gray-400">@message.SentDate.ToString("g")</span>
+        </li>
+    }
+</ul>

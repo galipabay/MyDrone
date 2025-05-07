@@ -1,15 +1,10 @@
-﻿using MyDrone.Kernel.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+using MyDrone.Kernel.Models;
+using MyDrone.Kernel.Repository;
 using MyDrone.Kernel.Services;
 using MyDrone.Kernel.UnitOfWork;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using MyDrone.Types;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Principal;
-using MyDrone.Kernel.Models;
 
 namespace MyDrone.Business.Services
 {
@@ -17,10 +12,12 @@ namespace MyDrone.Business.Services
     {
         private readonly IGenericRepository<T> _repository;
         private readonly IUnitOfWork _unitOfWork;
-        public Service(IGenericRepository<T> repository, IUnitOfWork unitOfWork)
+        private readonly AppDbContext _context;
+        public Service(IGenericRepository<T> repository, IUnitOfWork unitOfWork, AppDbContext context)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public async Task<T> AddAsync(T entity)
@@ -139,6 +136,28 @@ namespace MyDrone.Business.Services
             }
         }
 
+        public List<User> SearchUsers(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<User>();
+
+            query = query.ToLower().Trim();
+
+            return _context.Users
+                .Where(u =>
+                    (!string.IsNullOrEmpty(u.Name) && u.Name.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.Surname) && u.Surname.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.TelNo) && u.TelNo.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.MailAddress) && u.MailAddress.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.Country) && u.Country.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.City) && u.City.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.Province) && u.Province.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.District) && u.District.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.Street) && u.Street.ToLower().Contains(query)) ||
+                    (!string.IsNullOrEmpty(u.Apartment) && u.Apartment.ToLower().Contains(query))
+                )
+                .ToList();
+        }
 
     }
 }

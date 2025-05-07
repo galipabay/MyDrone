@@ -2,47 +2,120 @@
 for details on configuring this project to bundle and minify static web assets. */
 
 a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
 }
 
 a {
-  color: #0077cc;
+    color: #0077cc;
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #e5e5e5;
 }
+
 .border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 }
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
 button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+    font-size: 1rem;
+    line-height: inherit;
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
 }
+
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+}
+
+/* Chat Panel için yeni stil tanımları */
+#chatPanel {
+    background-color: #1b6ec2 !important;
+    border: 1px solid #ff0000 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: hidden;
+    flex-direction: column;
+    height: 600px;
+    width: 380px;
+    border-radius: 12px;
+}
+
+    #chatPanel.header {
+        background-color: #1861ac;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #chatPanel.search-bar {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #chatPanel.search-results {
+        padding: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    #chatPanel.user-list {
+        padding: 10px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    #chatPanel.active-chat-container {
+        padding: 10px;
+        flex: 1;
+        display: none;
+    }
+
+    #chatPanel.active-chat-header {
+        background-color: #f7f7f7;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #chatPanel.active-chat {
+        padding: 10px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    #chatPanel.message-input-area {
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }

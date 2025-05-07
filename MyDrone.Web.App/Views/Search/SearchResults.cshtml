@@ -1,0 +1,60 @@
+﻿@model SearchResultsViewModel
+
+@{
+    ViewData["Title"] = "Arama Sonuçları";
+}
+<head>
+    <link rel="stylesheet" href="~/css/custom-styles.css" />
+</head>
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container mt-4">
+    <!-- Container ile içerik genişliğini ayarlıyoruz -->
+    <div class="search-summary">
+        <p><strong>@Model.Query</strong> için toplam <span>@Model.Devices.Count</span> cihaz ve <span>@Model.Users.Count</span> kullanıcı bulundu.</p>
+    </div>
+
+    @if (Model.Devices.Any())
+    {
+        <h3>Cihazlar</h3>
+        <div class="device-results">
+            @foreach (var device in Model.Devices)
+            {
+                <div class="device-item">
+                    <h4>@device.Brand @device.Model</h4>
+                    <p>@device.Description</p>
+                    <p><strong>Renk:</strong> @device.Color</p>
+                    <p><strong>Kamera Kalitesi:</strong> @device.CamQuality</p>
+                    <p><strong>Menzi:</strong> @device.Range</p>
+                    <a href="@Url.Action("Details", "Device", new { id = device.Id })" class="btn btn-primary">Detaylar</a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Cihaz bulunamadı.</p>
+    }
+
+    @if (Model.Users.Any())
+    {
+        <h3>Kullanıcılar</h3>
+        <div class="user-results">
+            @foreach (var user in Model.Users)
+            {
+                <div class="user-item">
+                    <h4>@user.Name @user.Surname</h4>
+                    <p><strong>Telefon:</strong> @user.TelNo</p>
+                    <p><strong>E-posta:</strong> @user.MailAddress</p>
+                    <p><strong>Adres:</strong> @user.Street, @user.District, @user.Province, @user.City, @user.Country</p>
+                    <a href="@Url.Action("Profile", "User", new { id = user.Id })" class="btn btn-primary">Profil</a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Kullanıcı bulunamadı.</p>
+    }
+</div>

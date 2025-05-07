@@ -1,18 +1,13 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using MyDrone.Kernel.Models;
 using MyDrone.Kernel.Services;
 using MyDrone.Types;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using MyDrone.Business.Services;
 using MyDrone.Web.App.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Security.Claims;
 
 namespace MyDrone.Web.App.Controllers
 {
@@ -43,14 +38,15 @@ namespace MyDrone.Web.App.Controllers
             _sellerDeviceService = sellerDeviceService;
             _deviceService = deviceService;
         }
+
         #region Index
         public async Task<IActionResult> Index()
         {
             var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var devices = await _context.Device.ToListAsync();
+            var devices = await _context.Devices.ToListAsync();
 
             // Kullanıcı favorileri kontrol edilecek
-            var favoriteDeviceIds = _context.Favorite.Where(f => f.UserId == userId).Select(f => f.DeviceId).ToList();
+            var favoriteDeviceIds = _context.Favorites.Where(f => f.UserId == userId).Select(f => f.DeviceId).ToList();
 
             var viewModel = devices.Select(device => new DeviceDetailViewModel
             {
@@ -61,6 +57,20 @@ namespace MyDrone.Web.App.Controllers
 
             return View(viewModel);
         }
+        #endregion
+        #region Search
+        public IActionResult Index(string q)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(q))
+            {
+                query = query.Where(u => u.Name.Contains(q));
+            }
+
+            return View(query.ToList());
+        }
+
         #endregion
 
         #region Login
@@ -84,7 +94,7 @@ namespace MyDrone.Web.App.Controllers
             }
 
             // Kullanıcıyı veritabanından kontrol et
-            var user = await _context.User.FirstOrDefaultAsync(u =>
+            var user = await _context.Users.FirstOrDefaultAsync(u =>
                 (u.MailAddress == Identifier || u.TelNo == Identifier) && u.Password == Password);
 
             if (user != null)
@@ -146,7 +156,7 @@ namespace MyDrone.Web.App.Controllers
             }
 
             // Veritabanında aynı e-posta veya telefon numarası ile kayıtlı bir kullanıcı var mı kontrol et
-            var existingUser = await _context.User
+            var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.MailAddress == userDto.MailAddress || u.TelNo == userDto.TelNo);
 
             if (existingUser != null)
@@ -185,7 +195,7 @@ namespace MyDrone.Web.App.Controllers
                     }
                 }
 
-                _context.User.Add(newUser);
+                _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
                 // Başarılı kayıt sonrasında giriş ekranına yönlendirme yap
@@ -207,7 +217,7 @@ namespace MyDrone.Web.App.Controllers
         public IActionResult GetUserProfileImage(int userId)
         {
             // Kullanıcıyı ID ile veritabanında bul
-            var user = _context.User.FirstOrDefault(u => u.Id == userId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             if (user != null && user.Image != null)
             {
@@ -216,10 +226,7 @@ namespace MyDrone.Web.App.Controllers
             }
             else
             {
-                // Varsayılan profil fotoğrafı döndür
-                var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "default-profile.png");
-                var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
-                return File(defaultImage, "image/png");
+                return NotFound(); // Kullanıcı bulunamazsa 404 döndür
             }
         }
         #endregion
@@ -248,7 +255,7 @@ namespace MyDrone.Web.App.Controllers
             }
 
             // Kullanıcı bilgilerini veritabanından çekiyoruz.
-            var user = await _context.User
+            var user = await _context.Users
                 .Where(u => u.Id == int.Parse(userId))
                 .Select(u => new UserDto
                 {
@@ -282,7 +289,7 @@ namespace MyDrone.Web.App.Controllers
         {
             ViewBag.HideLayoutSections = true;
 
-            var user = await _context.User.FindAsync(model.Id);
+            var user = await _context.Users.FindAsync(model.Id);
 
             if (user == null)
             {
@@ -310,7 +317,7 @@ namespace MyDrone.Web.App.Controllers
                 }
             }
 
-            _context.User.Update(user);
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Profile");
@@ -327,14 +334,14 @@ namespace MyDrone.Web.App.Controllers
         [HttpPost]
         public IActionResult ForgotPassword(string Identifier)
         {
-            var user = _context.User.FirstOrDefault(u => u.MailAddress == Identifier);
+            var user = _context.Users.FirstOrDefault(u => u.MailAddress == Identifier);
 
             if (user != null)
             {
                 // Token oluşturuluyor
                 var token = Guid.NewGuid().ToString();
                 user.ResetPasswordToken = token;  // Token'ı veritabanında saklıyoruz
-                _context.User.Update(user);
+                _context.Users.Update(user);
                 _context.SaveChanges();
 
                 // Şifre sıfırlama bağlantısı oluşturuluyor
@@ -380,12 +387,12 @@ namespace MyDrone.Web.App.Controllers
                 // Burada token'ı doğrulamalısın ve şifreyi güncellemelisin.
                 // Token geçerli ise, şifreyi veritabanında güncelleyebilirsin.
 
-                var user = _context.User.FirstOrDefault(u => u.ResetPasswordToken == model.Token); // Token'ı veritabanında kontrol et
+                var user = _context.Users.FirstOrDefault(u => u.ResetPasswordToken == model.Token); // Token'ı veritabanında kontrol et
                 if (user != null)
                 {
                     // Şifreyi güncelle
                     user.Password = model.Password;  // Şifreyi güncelliyoruz
-                    _context.User.Update(user);
+                    _context.Users.Update(user);
                     _context.SaveChanges();
 
                     TempData["Message"] = "Şifreniz başarıyla değiştirildi!";

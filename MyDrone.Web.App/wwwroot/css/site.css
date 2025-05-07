@@ -1,24 +1,24 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 @keyframes heartAnimation {
@@ -40,4 +40,24 @@ body {
 
 .animated-heart {
     animation: heartAnimation 0.3s ease-out;
+}
+
+async function markAsRead(notificationId) {
+    await fetch(`/Notifications/MarkAsRead?id=${notificationId}`, {
+        method: 'POST'
+    });
+    // Badge güncelleme const badge = document.querySelector('.notification-badge');
+    if (badge)
+
+{
+    const count = parseInt(badge.textContent) - 1;
+    badge .textContent = count > 0 ? count : '';
+    if (count <= 0) badge.style.display = 'none';
+}
+
+// Bildirim öğesini güncelle
+const notificationItem = document.querySelector(`.notification-item[onclick*="${notificationId}"]`);
+if (notificationItem) {
+    notificationItem .classList.remove('font-bold');
+}
 }

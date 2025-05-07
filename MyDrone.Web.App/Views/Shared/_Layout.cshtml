@@ -1,214 +1,192 @@
-﻿<!-- Head kısmında Font Awesome ekleme -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-@using System.Security.Claims
-@RenderSection("Scripts", required: false)
-<link rel="stylesheet" href="~/css/site.css" />
-<link rel="stylesheet" href="~/css/Style.css" />
-
-<!DOCTYPE html>
-<html lang="tr">
+﻿<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - MyDrone</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            overflow-x: hidden; /* Yatay kaydırmayı önler */
-        }
+    <title>@ViewData["Title"] - MyDrone</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <!-- Day.js ve gerekli eklentileri CDN'den yükle -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.min.js"></script>
 
-        /* Navbar stilleri */
-        .navbar {
-            background-color: #213952;
-            z-index: 1050; /* Sidebar'dan daha yüksek olmalı */
-            position: sticky; /* Üstte sabitlenir */
-            width: 100%;
-            top: 0;
-            padding: 10px 20px;
-        }
+    <link href="~/css/Layout.css" rel="stylesheet"/>
+  
+    @RenderSection("Styles", required: false)
 
-            .navbar .nav-link {
-                color: white;
-            }
-
-                .navbar .nav-link:hover {
-                    color: #ffcc00;
-                }
-
-        /* Sidebar stilleri */
-        .sidebar {
-            width: 60px;
-            height: 100%;
-            background-color: #213952;
-            position: fixed;
-            top: 60px; /* Navbar'ın altında başlasın */
-            left: 0;
-            transition: width 0.3s, left 0.3s;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-            color: white;
-            z-index: 1040; /* Navbar'ın altında */
-            padding-top: 20px;
-        }
-
-            .sidebar.open {
-                width: 250px;
-                left: 0;
-            }
-
-            .sidebar:hover {
-                width: 250px;
-            }
-
-            .sidebar .toggle-button {
-                position: absolute;
-                top: 20px;
-                right: -30px;
-                background-color: #213952;
-                border: none;
-                color: white;
-                cursor: pointer;
-                width: 30px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 0 5px 5px 0;
-                z-index: 1100; /* Ok simgesi navbarın üstünde görünecek şekilde ayarlandı */
-            }
-
-            .sidebar .list-group-item {
-                background-color: transparent;
-                border: none;
-                color: white;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap; /* Metni taşırmaz */
-                display: flex;
-                align-items: center;
-            }
-
-            .sidebar:hover .list-group-item {
-                overflow: visible;
-                white-space: normal;
-            }
-
-        .menu-text {
-            display: none;
-        }
-
-        .sidebar:hover .menu-text {
-            display: inline-block;
-            margin-left: 10px;
-        }
-
-        /* Ana içerik alanı */
-        .main-content {
-            margin-left: 60px;
-            padding-top: 60px; /* Navbar yüksekliği kadar boşluk */
-            transition: margin-left 0.3s ease-in-out;
-        }
-
-        .sidebar:hover ~ .main-content {
-            margin-left: 250px;
-        }
-
-        /* Menü butonunu üst barın hemen altına yerleştirme */
-        .menu-toggle-container {
-            position: absolute;
-            top: 80px;
-            left: 10px;
-            z-index: 1100; /* Menü butonu navbarın üstünde */
-        }
-
-        /* Ok simgeleri */
-        .toggle-icon {
-            font-size: 24px;
-            color: white;
-            transition: transform 0.3s;
-        }
-    </style>
 </head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark w-100">
-        <a class="navbar-brand" href="@Url.Action("Index", "Home")">MyDrone</a>
-        <div class="d-flex align-items-center">
-            <form class="form-inline">
-                <input class="form-control mr-2" type="search" placeholder="Kelime, ilan no veya mağaza adı ile ara" aria-label="Search">
-                <button class="btn btn-outline-success mr-2" type="submit">Detaylı Arama</button>
+<body class="bg-gray-50" data-user-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)">
+
+    <!-- Navbar (Düzeltilmiş) -->
+    <nav class="navbar h-16 flex items-center justify-between px-8 shadow-md">
+        <div class="text-2xl font-bold tracking-tight text-white">MyDrone</div>
+        <div class="flex items-center space-x-4">
+            <!-- Arama Kutusu (Geri Eklendi) -->
+            <form method="get" asp-controller="Search" asp-action="Results" class="search-box flex items-center bg-gray-800 rounded-lg px-3 py-1">
+                <input type="text" name="query" placeholder="Ara..." class="bg-transparent text-white focus:outline-none w-full" value="@ViewBag.CurrentFilter">
+                <button type="submit" class="transition active:scale-95 ml-2 text-blue-400 hover:text-blue-300">
+                    <i class="fas fa-search"></i> 
+                </button>
             </form>
 
             @if (User.Identity.IsAuthenticated)
             {
-                <a href="@Url.Action("Profile", "User")" class="nav-link">
+                <!-- Bildirim Dropdown -->
+                <div class="relative">
+                    <button class="relative p-2 text-gray-300 hover:text-white focus:outline-none" id="notificationButton" aria-expanded="false" aria-haspopup="true">
+                        <i class="fas fa-bell text-lg"></i>
+                        @{
+                            var unreadCount = TempData["UnreadCount"] as int? ?? 0;
+                        }
+                        @if (unreadCount > 0)
+                        {
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-xs text-white rounded-full h-5 w-5 flex items-center justify-center">
+                                @unreadCount
+                            </span>
+                        }
+                    </button>
+                    <div class="hidden absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50" id="notificationDropdown">
+                        @if (TempData["Notifications"] != null)
+                        {
+                            var notifications = JsonConvert.DeserializeObject<List<Notification>>(TempData["Notifications"].ToString());
+                            foreach (var notification in notifications)
+                            {
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    @notification.Message
+                                    <span class="text-xs text-gray-400">@notification.CreatedDate.ToString("HH:mm")</span>
+                                </a>
+                            }
+                        }
+                        <div class="border-t border-gray-100"></div>
+                        <a href="@Url.Action("Notifications", "User")" class="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 text-center">Tümünü Gör</a>
+                    </div>
+                </div>
+            }
+                <!-- Profil Resmi (Düzeltilmiş) -->
+                <a href="@Url.Action("Profile", "User")" class="profile-img w-9 h-9 rounded-full overflow-hidden border-2 border-blue-500">
                     <img src="@Url.Action("GetUserProfileImage", "User", new { userId = User.FindFirstValue(ClaimTypes.NameIdentifier) })"
-                         class="rounded-circle" style="width: 40px; height: 40px;" alt="Profil Fotoğrafı">
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://www.gravatar.com/avatar/default?s=200&d=mp';">
                 </a>
 
-                <form asp-controller="User" asp-action="Logout" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-outline-danger ml-2">Çıkış Yap</button>
+                <form asp-controller="User" asp-action="Logout" method="post">
+                    <button type="submit" class="transition active:scale-95 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition flex items-center">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Çıkış
+                    </button>
                 </form>
             }
             else
             {
-                <a class="btn btn-secondary mr-2" href="@Url.Action("Register", "User")">Hesap Aç</a>
-                <a class="btn btn-secondary mr-2" href="@Url.Action("Login", "User")">Giriş Yap</a>
+                <a href="@Url.Action("Register", "User")" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition">
+                    <i class="fas fa-user-plus mr-1"></i> Kayıt Ol
+                </a>
+                <a href="@Url.Action("Login", "User")" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition">
+                    <i class="fas fa-sign-in-alt mr-1"></i> Giriş Yap
+                </a>
             }
         </div>
     </nav>
-
-    @if (User.Identity.IsAuthenticated)
-    {
-        <div class="sidebar" id="sidebar">
-            <ul class="list-group">
-                <li class="list-group-item d-flex align-items-center">
-                    <a href="@Url.Action("Devices", "Seller")" class="d-flex align-items-center" style="color: white; text-decoration: none;">
-                        <i class="fas fa-box-open mr-2"></i>
-                        <span class="menu-text">Ürünlerim</span>
-                    </a>
-                </li>
-                <li class="list-group-item d-flex align-items-center">
-                    <i class="fas fa-bell mr-2"></i>
-                    <span class="menu-text">Bildirimler</span>
-                </li>
-                <li class="list-group-item d-flex align-items-center">
-                    <i class="fas fa-heart mr-2"></i>
-                    <span class="menu-text">Favoriler</span>
-                </li>
-            </ul>
+    
+    <div class="flex">
+        <!-- Sidebar (Optimize Edilmiş) -->
+        <div class="sidebar-container">
+            <nav class="pt-4">
+                <a href="@Url.Action("Devices","Seller")"
+                   class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Seller" ? "active" : "")">
+                    <i class="fas fa-box-open sidebar-icon"></i>
+                    <span class="sidebar-text">Ürünlerim</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-heart sidebar-icon"></i>
+                    <span class="sidebar-text">Favoriler</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog sidebar-icon"></i>
+                    <span class="sidebar-text">Ayarlar</span>
+                </a>
+            </nav>
         </div>
-    }
 
-    <div class="content main-content" id="main-content">
-        <div class="menu-toggle-container">
+        <!-- Chat Trigger Icon -->
+        <div class="fixed bottom-6 right-6 z-50">
+            <button id="chatToggle"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg p-4 transition focus:outline-none">
+                💬
+            </button>
         </div>
+
+        <!-- Chat Panel - Flexbox Optimize Edilmiş Versiyon -->
+        <div id="chatPanel" class="fixed bottom-20 right-6 w-96 h-[600px] rounded-xl shadow-xl hidden z-50 border border-gray-200 bg-white flex flex-col">
+
+            <!-- Üst Bar -->
+            <div class="bg-blue-500 py-2 px-3 border-b flex justify-between items-center">
+                <div class="font-semibold text-base text-white">Mesajlar</div>
+                <button id="closeChat" class="text-white hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Arama Alanı -->
+            <div class="bg-gray-100 border-b border-gray-300 p-2 mt-0 mb-0">
+                <input type="text" id="userSearch" placeholder="Kullanıcı ara..."
+                       class="w-full rounded-lg bg-white text-gray-800 border border-gray-300
+               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+               transition duration-200 shadow-sm" />
+            </div>
+
+            <!-- Arama Sonuçları -->
+            <div id="searchResults" class="hidden bg-white border-b max-h-60 overflow-y-auto">
+
+            </div>
+
+            <!-- Ana İçerik Alanı -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Kullanıcı Listesi (Sol Taraf) -->
+                <div id="chatList" class="w-1/3 border-r overflow-y-auto flex flex-col">
+
+                </div>
+
+                <!-- Aktif Sohbet Alanı (Sağ Taraf) -->
+                <div id="activeChatContainer" class="flex-1 flex flex-col">
+                    <!-- Sohbet Başlığı -->
+                    <div id="activeChatHeader" class="p-3 border-b flex items-center bg-gray-50">
+                        <img id="activeChatUserImage" src="https://via.placeholder.com/40" class="w-8 h-8 rounded-full mr-2" alt="">
+                        <div id="activeChatUserName"class="font-medium text-gray-800"></div>
+                    </div>
+
+                    <!-- Mesajlar -->
+                    <div id="activeChat" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+
+                    </div>
+
+                    <!-- Mesaj Gönderme -->
+                    <div class="p-3 border-t bg-white flex gap-2">
+                        <input id="messageInput" type="text" placeholder="Mesajınızı yazın..."
+                               class="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        <button id="sendMessageButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
     </div>
 
-    @RenderBody()
+    @RenderSection("Scripts", required: false)
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-    <script>
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const icon = document.getElementById('toggle-icon');
-
-            sidebar.classList.toggle('open');
-            mainContent.classList.toggle('shift');
-
-            if (sidebar.classList.contains('open')) {
-                icon.innerHTML = '&#9664;'; // Sol ok
-            } else {
-                icon.innerHTML = '&#9654;'; // Sağ ok
-            }
-        }
-    </script>
+    <script type="module" src="/js/chatUI.js"></script>
+    <script type="module" src="/js/chatService.js"></script>
+    <script type="module" src="/js/chat.js"></script>
 
 </body>
 </html>
